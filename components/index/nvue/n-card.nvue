@@ -1,0 +1,28 @@
+<template>
+	<div>
+		<div class="w-100">
+			<div class="p-2">
+				<text class="text-dark  font-md font-weight" v-if="NCardData.title">{{NCardData.title}}</text>
+			</div>
+			<div>
+				<image v-if="NCardData.cover" style="height: 300px;" class="w-100" :src="NCardData.cover"></image>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	export default {
+		props:{
+			NCardData:{
+				title:String,
+				cover:String
+			}
+		}
+	}
+</script>
+
+<style src="@/common/zz-main-nvue.css"></style>
+<style>
+
+</style>

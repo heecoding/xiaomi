@@ -1,0 +1,66 @@
+<template>
+	
+		<div class="w-100" style="height: 75px;">
+		<!-- 横向滚动顶部选项卡 weex 模式-->
+			<scroller class="w-100 flex-row" style="height: 75px;" :show-scrollbar="false" scroll-direction="horizontal">
+				<div style="width: 120px; height: 75px;" @click="change(index)" :ref="`tab${index}`" v-for="(item,index) in tabBars" :key="index" class="a-center j-center px">
+					<text style="font-size: 30px; height: 75px; line-height: 75px; border-bottom-width: 5px;" :style="{'color':tabIndex === index? '#fd6801':'#555','border-color':tabIndex === index? '#fd6801':'#f7f7f7'}">{{item.name}}</text>
+				</div>
+			</scroller>
+		</div>
+		
+</template>
+
+<script>
+	//导入weex 的 dom 模块(官方没有引导，报错！)
+	const dom = weex.requireModule('dom');
+	
+	export default {
+		props:{
+			tabBars:{
+				type:Array,
+				default:[]
+			},
+			tabIndex:{
+				type:Number,
+				default:0
+			}
+		},
+		watch:{
+			//监听tabIndex的变化(滑动>tabIndex>监听>change事件)
+			tabIndex(newValue,oldValue){
+				this.change(newValue)
+			}
+		},
+		methods:{
+			async change(index){
+				//在此通知父组件修改 tabIndex (顶部点击改变当前选中this.tabIndex = index;)
+				// $emit 触发父组件事件修改传参
+				this.$emit('tabChange',index)
+				//监听顶部滚动区域变化
+					//:ref 拿到当前元素
+				let elm = this.$refs[`tab${index}`][0];
+				// console.log(elm)
+				//获取当前元素节点信息
+				dom.getComponentRect(this.$refs[`tab${index}`][0],(res) => {
+					// 当节点处于右边时
+					if(res.size.right > 750){
+						//拿到处于中间的节点
+						let newelm = this.$refs[`tab${index-4}`][0];
+						//是中间节点移动到最左边
+						return dom.scrollToElement(newelm,{});
+					}
+					// 当节点处于右边时
+					if(res.size.left < 0){
+						return dom.scrollToElement(elm,{});
+					}
+				})
+			}
+		}
+	}
+</script>
+
+<style src="@/common/zz-main-nvue.css"></style>
+<style>
+
+</style>

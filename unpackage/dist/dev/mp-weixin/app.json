@@ -1,0 +1,77 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/search/search",
+    "pages/search-list/search-list",
+    "pages/class/class",
+    "pages/cart/cart",
+    "pages/detail/detail",
+    "pages/my/my",
+    "pages/detail-comment/detail-comment",
+    "pages/user-set/user-set",
+    "pages/user-userinfo/user-userinfo",
+    "pages/user-path-list/user-path-list",
+    "pages/user-path-edit/user-path-edit",
+    "pages/order/order",
+    "pages/order-confirm/order-confirm",
+    "pages/order-invoice/order-invoice",
+    "pages/login/login",
+    "pages/msg-list/msg-list",
+    "pages/msg-detail/msg-detail",
+    "pages/pay-methods/pay-methods",
+    "pages/pay-result/pay-result",
+    "pages/order-coupon/order-coupon",
+    "pages/order-detail/order-detail",
+    "pages/logistics-detail/logistics-detail",
+    "pages/after-sale/after-sale",
+    "pages/about/about"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "仿小米商城",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#ff7400",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "static/tabbar/home.png",
+        "selectedIconPath": "static/tabbar/home-a.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/class/class",
+        "iconPath": "static/tabbar/search1.png",
+        "selectedIconPath": "static/tabbar/search1-a.png",
+        "text": "分类"
+      },
+      {
+        "pagePath": "pages/cart/cart",
+        "iconPath": "static/tabbar/gcar.png",
+        "selectedIconPath": "static/tabbar/gcar-a.png",
+        "text": "购物车"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "iconPath": "static/tabbar/myself.png",
+        "selectedIconPath": "static/tabbar/myself-a.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": ""
+    }
+  },
+  "usingComponents": {
+    "myline": "/components/common/myline",
+    "loading-plus": "/common/mixin/loading-plus"
+  }
+}

@@ -1,0 +1,17 @@
+page{
+	/*页面全局样式，影响滑动视图等*/
+	height: 100%;
+	font-size: 28upx;
+	line-height: 1.8;
+	background: #ffffff;
+}
+image{	width: 100%;}
+.main-bg-color{ background: #fd6801;}
+/*主色调*/
+.main-bg-hover-color{ background: rgba(253,124,0,.85);}
+/*主点击背景颜色*/
+.main-text-color{ color: #fd6801;}
+/*主字体颜色*/
+.main-border-color{ border-color: #f1f1f1;}
+/*主边框颜色*/
+.input-border-color{ border-color: #FD6801;}

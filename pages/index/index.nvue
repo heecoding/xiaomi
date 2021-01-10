@@ -1,0 +1,303 @@
+<template>
+	<div>
+		<!-- 顶部选项卡 -->
+		<Ntabbox :tabBars="tabBars"  :tabIndex="tabIndex" @tabChange="tabChange" />
+		
+		<!-- 横向滚动列表 -->
+		<slider class="flex-1" :index="tabIndex" @change="sliderChange" :infinite="false">
+				<list :show-scrollbar="false" v-for="(list,listIndex) in newItems" :key="listIndex">
+					<!-- 下拉刷新 -->
+					<refresh class="w-100 flex-row j-center a-center" style="height: 80px;" @refresh="refresh" @pullingdown="pullingdown" :display="list.refreshShow">
+						<text class="text-light-muted font-md">{{list.refreshText}}</text>
+					</refresh>
+					
+					<template v-if="list.data.length > 0 && list.firstLoad === 'after'">
+						<!-- 首页模板 -->
+						<template v-if="tabBars[listIndex].template === 'index'">
+							<cell v-for="(listItem,ItemIndex) in list.data" :key="ItemIndex">
+								<!-- 轮播图组件 -->
+								<Nswiper v-if="listItem.type === 'swiper'" :NSwiperSrc='listItem.data' />
+								<!-- 图标分类组件 -->
+								<template v-if="listItem.type === 'indexnavs'">
+									<Nnav :NNavSrc="listItem.data" />
+									<Nmyline />
+								</template>
+								<!-- 三图广告组件 -->
+								<template v-if="listItem.type === 'threeAdv'">
+									<Nthreeimg  :NThreeImgSrc="listItem.data" />
+									<Nmyline />
+								</template>
+								<!-- 大图广告 -->
+								<Ncard v-if="listItem.type === 'oneAdv'" :NCardData="listItem.data" />
+								<!-- 公共列表组件 间隙5rpx 两列-->
+								<div class="w-100 row bg-white" v-if="listItem.type === 'list'">
+									<block v-for="(item,index) in listItem.data" :key="index">
+										<Ncommonlist :index="index" :item="item" />
+									</block>
+								</div>
+								
+							</cell>
+						</template>
+						<!-- 专题页模板 -->
+						<template v-else-if="tabBars[listIndex].template === 'special'">
+							<cell v-for="(listItem,ItemIndex) in list.data" :key="ItemIndex">
+								<!-- 轮播图组件 -->
+								<Nswiper v-if="listItem.type === 'swiper'" :NSwiperSrc='listItem.data' />
+								<!-- 图标分类组件 -->
+								<template v-if="listItem.type === 'indexnavs'">
+									<Nnav :NNavSrc="listItem.data" />
+									<Nmyline />
+								</template>
+								<!-- 三图广告组件 -->
+								<template v-if="listItem.type === 'threeAdv'">
+									<Nthreeimg  :NThreeImgSrc="listItem.data" />
+									<Nmyline />
+								</template>
+								<!-- 大图广告 -->
+								<Ncard v-if="listItem.type === 'oneAdv'" :NCardData="listItem.data" />
+								<!-- 公共列表组件 间隙5rpx 两列-->
+								<div class="w-100 row bg-white" v-if="listItem.type === 'list'">
+									<block v-for="(item,index) in listItem.data" :key="index">
+										<Ncommonlist :index="index" :item="item" />
+									</block>
+								</div>
+							</cell>
+						</template>
+					</template>
+					<!-- 加载中时 -->
+					<template v-else-if="list.firstLoad === 'ing'">
+						<cell class="j-center a-center pt-5">
+							<text class="font-md text-light-muted">加载中...</text>
+						</cell>
+					</template>
+					<!-- 空数据时 -->
+					<template v-else>
+						<cell class="j-center a-center pt-5">
+							<text class="font-md text-light-muted">暂无数据</text>
+						</cell>
+					</template>
+					
+					<!-- 上拉加载 -->
+					<loading @loading="onLoading" :display="list.loadingShow" class="w-100 flex-row j-center a-center text-center" style="height: 70px;">
+						<text class="font-md text-light-muted">{{list.loadingText}}</text>
+					</loading>
+				</list>
+
+		</slider>
+	</div>
+</template>
+
+<script>
+	import $H from '@/common/lib/request.js'
+	
+	import Ntabbox from "@/components/index/nvue/n-tabBox.nvue";
+	import Nswiper from '@/components/index/nvue/n-swiper.nvue';
+	import Nnav from '@/components/index/nvue/n-nav.nvue';
+	import Nmyline from '@/components/common/n-myline.nvue';
+	import Nthreeimg from '@/components/index/nvue/n-threeimg.nvue';
+	import Ncard from '@/components/index/nvue/n-card.nvue';
+	import Nprice from '@/components/common/n-price.nvue';
+	import Ncommonlist from "@/components/common/n-commonList.nvue";
+	
+	// 获取当前窗口对象
+	const currentWebview = plus.webview.currentWebview();
+	
+	export default {
+		// mixins:[$H],
+		components:{
+			Ntabbox,
+			Nswiper,
+			Nnav,
+			Nmyline,
+			Nthreeimg,
+			Ncard,
+			Nprice,
+			Ncommonlist
+		},
+		data(){
+			return{
+				newItems:[],
+				tabIndex:0,
+				tabBars: []
+			}
+		},
+		created(){
+			//监听当前窗口显示
+			currentWebview.addEventListener('show',e=>{
+				
+			});
+			//初始化数据
+			this.__init()
+		},
+		onNavigationBarSearchInputClicked(){
+			uni.navigateTo({
+				url:'../search/search',
+			})
+		},
+		methods:{
+			// 初始化
+			async __init(){
+				//初次封装
+				// $H.get('/index_category/data').then((res)=>{
+				// 	console.log('封装请求成功')
+				// 	console.log(res)
+				// }).catch(()=>{
+				// 	console.log('请求失败')
+				// })
+				// return ;
+				//原始
+				// let [error, res] = await uni.request({
+				// 	url: 'http://ceshi3.dishait.cn/api/index_category/data',
+				// 	method: 'GET'
+				// });
+				// //错误
+				// if(error){
+				// 	return uni.showToast({
+				// 		title:error.errMsg,
+				// 		icon:'none'
+				// 	})
+				// }
+				// //失效
+				// if(res.statusCode !==200){
+				// 	return uni.showToast({
+				// 		title:res.data.msg,
+				// 		icon:'none'
+				// 	})
+				// }
+				// //成功
+				// let data = res.data.data
+				
+				//封装升级(使用一)
+				// let data = await $H.get('/index_category/data')
+				// if(data){
+				// 	//初始化tabbars
+				// 	this.tabBars = data.category
+				// 	//初始化页面
+				// 	this.newItems = this.setNewsItems(data)
+				// }
+				//封装升级(使用二)
+				$H.get('/index_category/data').then((data)=>{
+					//初始化tabbars
+					this.tabBars = data.category
+					//初始化页面
+					this.newItems = this.setNewsItems(data)
+				})
+			},
+			//初始化页面
+			setNewsItems(e){
+				let ary = [];
+				//拿到 tarBars 的长度，根据长度生成页面
+				let tabLength = this.tabBars.length;
+				for(let i = 0; i < tabLength; i++){
+					//首屏数据已经初始化，特殊处理，标识已经完成
+					let firstLoad = i === 0 ? 'after' : "before"
+					let aryItem = {
+						refreshShow:'hide',
+						refreshText:'下拉刷新',
+						loadingShow:'hide',
+						loadingText:'加载更多',
+						loadingText:'加载更多 ...',
+						data:[],
+						firstLoad:firstLoad
+					}
+					//给首屏初始化数据
+					if(this.tabBars[i].template === 'index'){
+						aryItem.data = e.data
+					}
+					ary.push(aryItem);
+				}
+				return ary;
+			},
+			tabChange(index){//顶部点击改变当前选中
+				this.tabIndex = index;
+				//加载数据
+				// this.addData();
+			},
+			sliderChange(e){//监听横向滚动列表
+				this.tabIndex = e.index;
+				//给标识，减少请求
+				if(this.newItems[this.tabIndex].firstLoad === 'before'){
+					this.addData();
+				}
+			},
+			onLoading(){//上拉加载
+				//存储当前索引
+				let index = this.tabIndex;
+				this.newItems[index].loadingShow = 'show';
+				//没有更多
+				if(this.newItems[index].loadingText === '没有更多了'){
+					uni.showToast({title:'没有更多了',icon:'none'});
+					return this.newItems[index].loadingShow = 'hide';
+				}
+				// 加载数据
+				this.addData(()=>{
+					uni.showToast({title:'加载完成',icon:'none'});
+					this.newItems[index].loadingShow = 'hide';
+				});
+			},
+			refresh(e){
+				//存储当前索引
+				let index = this.tabIndex;
+				this.newItems[index].refreshShow = 'show';
+				this.newItems[index].refreshText = '正在刷新 ...';
+				//请求刷新数据
+				this.addData(()=>{
+					this.newItems[index].refreshText = "下拉刷新";
+					this.newItems[index].refreshShow = 'hide';
+					uni.showToast({title:'刷新成功',icon:'none'});
+				},true)
+			},
+			pullingdown(e){
+				let index = this.tabIndex;
+				if(e.pullingDistance > e.viewHeight){
+					this.newItems[index].refreshText = "释放就能刷新";
+				}else{
+					this.newItems[index].refreshText = "下拉可以刷新";
+				}
+			},
+			//加载/刷新数据
+			async addData(callback = false,refresh = false){
+				//拿到当前索引e
+				let e = this.tabIndex;
+				//拿到当前分类的id
+				let id = this.tabBars[e].id;
+				//拿到当前分类分页码  data内数据5条 0->1   3->2  5->2
+				let page = !refresh ? (Math.ceil(this.newItems[e].data.length/5) + 1):1;
+				//修改标识，标记请求状态（首次加载中）(解决加载数据前的无数据显示问题)不是刷新不显示
+				if(page === 1 && this.newItems[e].refreshShow === 'hide'){
+					this.newItems[e].firstLoad = 'ing';
+				}
+				
+				let data = await $H.get('/index_category/'+id+'/data/'+page)
+				
+				//修改标识，标记请求状态（首次加载完成）
+				if(page === 1 && this.newItems[e].refreshShow === 'hide'){
+					this.newItems[e].firstLoad = 'after';
+				}
+				//成功
+				if(data){
+					//赋值和渲染
+					this.newItems[e].data = !refresh ? [...this.newItems[e].data,...data]:[...data];
+					//没有更多
+					if(data.length < 5){
+						this.newItems[e].loadingText = '没有更多了';
+						return;
+					}
+				}
+				//执行回调函数
+				if(typeof callback === 'function'){
+					callback()
+				}
+			}
+		},
+		beforeDestroy(){
+			//移除监听事件
+			currentWebview.removeEventListener('show',e=>{
+				
+			});
+		}
+	}
+</script>
+
+<style src="@/common/zz-main-nvue.css"></style>
+<style></style>

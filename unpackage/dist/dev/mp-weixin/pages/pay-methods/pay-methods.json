@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "选择支付方式",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "price": "/components/common/price",
+    "uni-list-item": "/components/uni-ui/uni-list-item/uni-list-item"
+  }
+}

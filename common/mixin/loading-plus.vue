@@ -1,0 +1,12 @@
+<template>
+	<!-- 优化加载  类似mask-->
+	<view class="position-fixed top-0 right-0 bottom-0 left-0 bg-white font-lg d-flex a-center j-center text-light-muted" style="z-index: 10000;">
+		加载中...
+	</view>
+</template>
+
+<script>
+</script>
+
+<style>
+</style>

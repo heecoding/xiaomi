@@ -1,0 +1,14 @@
+<template>
+	<view class="w-100" style="height: 18px; background-color: #f5f5f5;"></view>
+</template>
+
+<script>
+	export default {
+		
+	}
+</script>
+
+<style src="@/common/zz-main-nvue.css"></style>
+<style>
+
+</style>

@@ -1,0 +1,1 @@
+<view class="{{['Tpopup data-v-5850f3fa',popupClass]}}"><view data-event-opts="{{[['tap',[['$emit',['hide']]]]]}}" class="Tmask data-v-5850f3fa" catchtap="__e"></view><view class="Tbody data-v-5850f3fa"><slot></slot></view></view>

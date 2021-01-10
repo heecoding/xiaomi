@@ -1,0 +1,21 @@
+<template>
+	<div>
+		<div class="flex-row j-center">
+			<text class="font a-start" style="color: #fd6801;">￥</text>
+			<text style="color: #fd6801; font-size: 36px;">{{resPrice}}</text>
+		</div>
+	</div>
+</template>
+
+<script>
+	export default {
+		props:{
+			resPrice:Number
+		}
+	}
+</script>
+
+<style src="@/common/zz-main-nvue.css"></style>
+<style>
+
+</style>

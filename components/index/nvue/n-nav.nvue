@@ -1,0 +1,28 @@
+<template>
+	<div class="row w-100 py-1 px-2 mb-3">
+		<div class="navBox j-center a-center mt-3" v-for="(item,index) in NNavSrc" :key="index">
+			<image class="nnavImg" :src="item.src" mode="widthFix"></image>
+			<text class="font text-light-muted mt-1">{{item.text}}</text>
+		</div>
+	</div>
+</template>
+
+<script>
+	export default {
+		props:{
+			NNavSrc:Array
+		}
+	}
+</script>
+
+<style src="@/common/zz-main-nvue.css"></style>
+<style>
+.navBox{
+	width: 142px;
+	background-color: #FFFFFF;
+}
+.nnavImg{
+	width: 58px;
+	height: 58px;
+}
+</style>

@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "增加收货地址",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "myline": "/components/common/myline",
+    "mpvue-city-picker": "/components/uni-ui/mpvue-citypicker/mpvueCityPicker"
+  }
+}

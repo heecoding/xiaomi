@@ -1,0 +1,38 @@
+<template>
+	<div class="col-6" style="padding-left: 2.5px; padding-right: 2.5px;" @click="openDetail">
+		<image :src="item.cover" style="width: 370px; height: 370px;"></image>
+		<text class="font-md text-dark px-2 py-1 text-a" style="lines: 1;">{{item.title}}</text>
+		<text class="px-2 font text-light-muted text-a" style="lines: 1;">{{item.desc}}</text>
+		<div class="px-2 pt-1 row j-center a-end">
+			<Nprice :resPrice="item.pprice" />
+			<text class="text-light-muted font ml-1" style="text-decoration: line-through;">￥{{item.oprice}}</text>
+		</div>
+	</div>
+</template>
+
+<script>
+	import Nprice from '@/components/common/n-price.nvue';
+	
+	export default {
+		components:{
+			Nprice
+		},
+		props:{
+			item:Object,
+			index:Number
+		},
+		methods:{
+			openDetail(){
+				uni.navigateTo({
+					//GET传参方式，把参数带到子页
+					url:'/pages/detail/detail?detail='+JSON.stringify(this.item)
+				})
+			}
+		}
+	}
+</script>
+
+<style src="@/common/zz-main-nvue.css"></style>
+<style>
+
+</style>

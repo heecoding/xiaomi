@@ -1,0 +1,33 @@
+<template>
+	<div>
+		<div class="w-100 row">
+			<div class="col-6">
+				<image style="width: 373px; height: 530px;" :src="NThreeImgSrc[0].src" mode="widthFix"></image>
+			</div>
+			<div class="col-6 j-sb">
+				<div class="img">
+					<image class="img" :src="NThreeImgSrc[1].src" mode="widthFix"></image>
+				</div>
+				<div class="img">
+					<image class="img" :src="NThreeImgSrc[2].src" mode="widthFix"></image>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	export default {
+		props:{
+			NThreeImgSrc:Object
+		}
+	}
+</script>
+
+<style src="@/common/zz-main-nvue.css"></style>
+<style>
+.img{
+	width: 375px;
+	height: 264px;
+}
+</style>

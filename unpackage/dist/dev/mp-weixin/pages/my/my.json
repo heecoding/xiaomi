@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "card": "/components/common/card",
+    "myline": "/components/common/myline",
+    "uni-list-item": "/components/uni-ui/uni-list-item/uni-list-item"
+  }
+}

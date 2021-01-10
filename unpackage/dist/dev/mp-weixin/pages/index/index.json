@@ -1,0 +1,9 @@
+{
+  "usingComponents": {
+    "index-swiper": "/components/index/index-swiper",
+    "index-nav": "/components/index/index-nav",
+    "index-three-img": "/components/index/index-threeImg",
+    "card": "/components/common/card",
+    "common-list": "/components/common/commonList"
+  }
+}

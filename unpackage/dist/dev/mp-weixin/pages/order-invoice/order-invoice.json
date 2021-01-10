@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "发票",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "card": "/components/common/card",
+    "zradio-group": "/components/common/radio-group"
+  }
+}

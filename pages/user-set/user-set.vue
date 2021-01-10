@@ -4,7 +4,7 @@
 			<uniListItem title="个人资料" :showExtraIcon="true">
 				<view slot="right" class="iconfont icon-you text-light-muted"></view>
 			</uniListItem>
-			<uniListItem title="收货地址" :showExtraIcon="true">
+			<uniListItem title="收货地址" :showExtraIcon="true" @click="navigate('user-path-list')">
 				<view slot="right" class="iconfont icon-you text-light-muted"></view>
 			</uniListItem>
 		</card>

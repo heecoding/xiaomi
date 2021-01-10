@@ -21,7 +21,7 @@
 		<card>
 			<view slot="cardTitle" class="d-flex a-center j-sb w-100">
 				<text class="font-md font-weight">我的订单</text>
-				<view class="text-secondary font" hover-class="bg-light-secondary" @click.stop="navigate('user-path-list',true)">
+				<view class="text-secondary font" hover-class="bg-light-secondary" @click="navigate('order',true)">
 					全部订单<text class="iconfont icon-you font"></text>
 				</view>
 			</view>

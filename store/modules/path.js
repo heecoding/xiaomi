@@ -1,21 +1,6 @@
 export default{
 	state:{
-		list:[
-			{
-				name:'姓名',
-				phone:'188****8888',
-				path:'河南省 郑州市 金水区',
-				detailPath:'CBD',
-				isDefault:false
-			},
-			{
-				name:'姓名',
-				phone:'188****8888',
-				path:'河南省 郑州市 金水区',
-				detailPath:'CBD',
-				isDefault:false
-			}
-		],
+		list:[],
 	},
 	getters:{
 		//获取默认地址状态
@@ -24,6 +9,10 @@ export default{
 		}
 	},
 	mutations:{
+		//覆盖收货地址
+		updatePathList(state,{refresh,list}){
+			state.list = refresh ? list : [...state.list,list]
+		},
 		//创建收货地址
 		createPath(state,item){
 			state.list.unshift(item)

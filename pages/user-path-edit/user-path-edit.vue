@@ -8,23 +8,27 @@
 			<view class="font-md text-secondary mr-1 flex-shrink">手机号：</view>
 			<input class="px-1 font-md flex-1" type="text" v-model="from.phone" />
 		</view>
+		<view class="p-2 d-flex a-center bg-white">
+			<view class="font-md text-secondary mr-1 flex-shrink">邮编：</view>
+			<input class="px-1 font-md flex-1" type="text" v-model="from.zip" />
+		</view>
 		<myline></myline>
 		<view class="p-2 border-bottom d-flex a-center bg-white">
 			<view class="font-md text-secondary mr-1 flex-shrink">所在地区：</view>
 			<!-- 禁用input并给提示信息disabled -->
-			<input class="px-1 font-md flex-1"  type="text" disabled @click="showMulLinkageThreePicker" placeholder="选择所在地区" :value="from.path" />
+			<input class="px-1 font-md flex-1"  type="text" disabled @click="showMulLinkageThreePicker" placeholder="选择所在地区" :value="path" />
 			<!-- 地址的三级联动  input触发联动显示-->
 			<mpvue-city-picker :themeColor="themeColor" ref="mpvueCityPicker" :pickerValueDefault="pickerValue" @onConfirm="onConfirm"></mpvue-city-picker>
 			
 		</view>
 		<view class="p-2 d-flex a-center bg-white">
 			<view class="font-md text-secondary mr-1 flex-shrink">详细地址：</view>
-			<input class="px-1 font-md flex-1" type="text" v-model="from.detailPath" />
+			<input class="px-1 font-md flex-1" type="text" v-model="from.address" />
 		</view>
 		<myline></myline>
 		<view class="p-2 d-flex a-center bg-white">
 			<view class="font-md text-secondary mr-1 flex-shrink">设为默认地址：</view>
-			<switch :checked="from.isDefault" color="#FD6801" class="ml-auto" @change="from.isDefault=$event.detail.value" />
+			<switch :checked="from.default" color="#FD6801" class="ml-auto" @change="from.default = $event.detail.value ? 1:0" />
 		</view>
 		<myline></myline>
 		<view class="p-3">
@@ -50,11 +54,14 @@
 				themeColor: '#007AFF',
 				pickerValue: [0, 0, 1],
 				from:{
-					path:'',
+					zip:'',
+					province:'',
+					city:'',
+					district:'',
 					name:'',
 					phone:'',
-					detailPath:'',
-					isDefault:false
+					address:'',
+					default:0
 				}
 			}
 		},
@@ -82,11 +89,21 @@
 				this.$refs.mpvueCityPicker.pickerCancel()
 			}
 		},
+		computed:{
+			path(){
+				if(this.from.province){
+					return this.from.province +'-'+ this.from.city +'-'+ this.from.district
+				}
+			}
+		},
 		methods: {
 			//三级联动的确定
 			onConfirm(e) {
-				this.from.path = e.label
-				this.pickerValue = e.value
+				// this.from.path = e.label
+				let arr = e.label.split('-')
+				this.from.province = arr[0]
+				this.from.city = arr[1]
+				this.from.district = arr[2]
 			},
 			//显示三级联动选择
 			showMulLinkageThreePicker() {
@@ -97,27 +114,41 @@
 			//提交数据
 			submit(){
 				//验证表单
-				//修改
+				//修改地址
 				if(this.isedit){
-					this.updataPathAction({
-						index:this.index,
-						item:this.from
+					//修改请求
+					this.$H.post('/useraddresses/'+this.from.id,this.from,{
+						token:true
+					}).then(res=>{
+						this.updataPathAction({
+							index:this.index,
+							item:this.from
+						})
+						uni.showToast({
+							title: '修改成功'
+						})
+						uni.navigateBack({ delta:1 })
+						//触发一个监听事件（修改默认地址后）
+						uni.$emit('updateUserPathList')
 					})
-					uni.showToast({
-						title: '修改成功'
-					})
-					return uni.navigateBack({ delta:1 });
+					return;
 				}
-				//创建地址
-				this.createPathAction(this.from);
-				uni.showToast({
-					title: '创建成功'
-				});
-				setTimeout(()=>{
-					uni.navigateBack({
-						delta:1
+				
+				//创建地址请求
+				this.$H.post('/useraddresses',this.from,{
+					token:true
+				}).then(res=>{
+					//创建地址
+					this.createPathAction(this.from);
+					uni.showToast({
+						title: '创建成功'
 					});
-				},500)
+					setTimeout(()=>{
+						uni.navigateBack({
+							delta:1
+						});
+					},200)
+				})
 			}
 		}
 	}

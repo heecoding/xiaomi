@@ -27,6 +27,9 @@ Vue.prototype.navigateTo = (options)=>{
 	}
 	uni.navigateTo(options)
 }
+//更新tabbar角标
+import $U from './common/lib/util.js'
+Vue.prototype.$U = $U
 
 Vue.component('myline',myline)
 Vue.component('loading-plus',loadingPlus)

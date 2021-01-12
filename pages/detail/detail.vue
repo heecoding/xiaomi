@@ -129,12 +129,12 @@
 			</scroll-view>
 			<!-- 按钮 -->
 			<view
-				class="main-bg-color text-white font-md d-flex j-center a-center"
+				class="text-white font-md d-flex j-center a-center"
 				style="height: 100rpx; margin-left: -30rpx; margin-right: -30rpx;"
-				hover-class="main-bg-hover-color"
+				:hover-class="maxStock !== 0 ? 'main-bg-hover-color':''" :class="maxStock === 0 ? 'bg-secondary':'main-bg-color'"
 				@tap.stop="addCart"
 			>
-				加入购物车
+				{{maxStock === 0 ? '暂时无货':'加入购物车'}}
 			</view>
 		</commonPopup>
 	</view>
@@ -340,18 +340,40 @@ export default {
 			})
 		},
 		addCart(){ //加入购车
+			//无库存
+			if(this.maxStock === 0){
+				return;
+			}
+			this.$H.post('/cart',{
+				shop_id:this.details.sku_type === 0 ? this.details.id : this.details.goodsSkus[this.checkedSkusIndex].id,
+				skus_type:this.details.sku_type,
+				num:this.details.num
+			},{
+				token:true
+			}).then(res=>{
+				//通知购物车页面更新商品
+				uni.$emit('updateCart')
+				//隐藏筛选框
+				this.hide('attr')
+				//成功的提示
+				uni.showToast({
+					title: '加入成功'
+				})
+			})
+			
+			
 			//组织数据
-			let goods = this.details;
-			goods['checked'] = false;
-			goods['attrs'] = this.selects;
-			//加入购物车
-			this.addGoodsToCart(goods);
-			//隐藏筛选框
-			this.hide('attr');
-			//成功的提示
-			uni.showToast({
-				title: '加入成功'
-			});
+			// let goods = this.details;
+			// goods['checked'] = false;
+			// goods['attrs'] = this.selects;
+			// //加入购物车
+			// this.addGoodsToCart(goods);
+			// //隐藏筛选框
+			// this.hide('attr');
+			// //成功的提示
+			// uni.showToast({
+			// 	title: '加入成功'
+			// });
 		},
 		openCreatePath(){
 			uni.navigateTo({

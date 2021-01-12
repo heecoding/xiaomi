@@ -28,8 +28,8 @@
 					</view>
 					
 					<!-- 编辑状态下 规格属性变化 -->
-					<view class="d-flex text-light-muted mb-1" :class="isedit? 'p-1 bg-light-secondary mb-2':''" @tap.stop="doShowPopup(index)">
-						<text class="mr-1" v-for="(item2,index2) in item.attrs" :key="index2">{{item2.list[item2.selected].name}}</text>
+					<view class="d-flex text-light-muted mb-1" :class="isedit? 'p-1 bg-light-secondary mb-2':''" @tap.stop="showPopup(index,item)" v-if="item.skus_type === 1">
+						{{item.skusText}}
 						<view class="iconfont icon-icon-arrow-bottom2 font ml-auto" v-if="isedit"></view>
 					</view>
 					<view class="mt-auto d-flex j-sb">
@@ -44,13 +44,13 @@
 		</view>
 		
 		<view class="text-center main-text-color font-md font-weight mt-5">为你推荐</view>
-		<view class="position-relative d-flex a-center j-center text-secondarymb-3 pt-3">
+		<view class="position-relative d-flex a-center j-center text-secondary mb-3 pt-3">
 			<view style="background: #F5F5F5; z-index: 2;" class="px-2 position-absolute">买的人还买了</view>
 			<view class="position-absolute bg-dark" style="height: 1rpx; left: 0; right: 0; background: #dddddd;"></view>
 		</view>
 		<!-- 猜你喜欢 -->
 		<view class="row j-sb bg-white">
-			<commonList v-for="(item,index) in loveList" :key="index" :item="item" :index="index"></commonList>
+			<commonList v-for="(item,index) in hotList" :key="index" :item="item" :index="index"></commonList>
 		</view>
 		
 		<!-- 占位 -->
@@ -80,52 +80,19 @@
 		</view>
 		
 		<!-- 属性筛选 -->
-		<commonPopup :popupClass="popupShow" @hide="doHidePopup">
-			<!-- 商品图片 -->
-			<view class="d-flex a-center" style="height: 275rpx;">
-				<image src="/static/images/s6.jpg" mode="widthFix" style="width: 180rpx; height: 180rpx;" class="border rounded"></image>
-				<view class="pl-2">
-					<price priceSize="font-lg" unitSize="font">1399</price>
-					<view>
-						<text class="mr-1" v-for="(attr,attrIndex) in popupData.attrs" :key="attrIndex">{{attr.list[attr.selected].name}}</text>
-					</view>
-				</view>
-			</view>
-			<!-- 表单 -->
-			<scroll-view scroll-y class="w-100" style="height: 660rpx;">
-				<card :headTitle="item.title" :headTitleWWeight="false" :headBorderBottom="false" v-for="(item, index) in popupData.attrs" :key="index">
-					<ZradioGroup :radioLabel="item" :selected.sync="item.selected"></ZradioGroup>
-				</card>
-				<view class="d-flex j-sb a-center p-2 border-top border-light-secondary">
-					<text>购买数量</text>
-					<uniNumberBox :min="popupData.minnum" :max="popupData.maxnum" :value="popupData.num+''" @change="popupData.num = $event"></uniNumberBox>
-				</view>
-			</scroll-view>
-			<!-- 按钮 -->
-			<view
-				class="main-bg-color text-white font-md d-flex j-center a-center"
-				style="height: 100rpx; margin-left: -30rpx; margin-right: -30rpx;"
-				hover-class="main-bg-hover-color"
-				@tap.stop="doHidePopup"
-			>
-				确定
-			</view>
-		</commonPopup>
+		<sku-popup></sku-popup>
 	</view>
 </template>
 
 <script>
 	import loading from '@/common/mixin/loading.js'
-	import ff from '@/common/mixin/loading.js'
 	
 	import {mapState,mapGetters,mapMutations,mapActions} from 'vuex'
 	import uniNavBar from '@/components/uni-ui/uni-nav-bar/uni-nav-bar.vue'
 	import price from '@/components/common/price.vue'
 	import uniNumberBox from '@/components/uni-ui/uni-number-box/uni-number-box.vue'
-	import card from '@/components/common/card.vue'
-	import ZradioGroup from '@/components/common/radio-group.vue'
-	import commonPopup from '@/components/common/common-popup.vue'
 	import commonList from '@/components/common/commonList.vue'
+	import skuPopup from '@/components/cart/sku-popup.vue'
 		
 	export default{
 		mixins:[loading],
@@ -133,69 +100,139 @@
 			uniNavBar,
 			price,
 			uniNumberBox,
-			card,
-			ZradioGroup,
-			commonPopup,
-			commonList
+			commonList,
+			skuPopup
 		},
 		data(){
 			return{
 				isedit:false,
-				loveList: [
-					{
-						cover: '/static/images/s6.jpg',
-						title: 'Redmi K30 4G',
-						desc: '120Hz流速屏，全速热爱',
-						oprice: 2699,
-						nprice: 1399
-					},
-					{
-						cover: '/static/images/s7.jpg',
-						title: 'Redmi K30 4G',
-						desc: '120Hz流速屏，全速热爱',
-						oprice: 2699,
-						nprice: 1399
-					},
-					{
-						cover: '/static/images/s8.jpg',
-						title: 'Redmi K30 4G',
-						desc: '120Hz流速屏，全速热爱',
-						oprice: 2699,
-						nprice: 1399
-					},
-					{
-						cover: '/static/images/s9.jpg',
-						title: 'Redmi K30 4G',
-						desc: '120Hz流速屏，全速热爱',
-						oprice: 2699,
-						nprice: 1399
-					}
-				]
+				hotList: []
 			}
+		},
+		onLoad(){
+			this.getData()
+			//创建添加购物车的全局监听
+			uni.$on('updateCart',()=>{
+				this.getData()
+			})
+		},
+		beforeDestroy() {
+			//卸载添加购物车的全局监听
+			uni.$off('updateCart')
+		},
+		onPullDownRefresh() {
+			this.getData()
 		},
 		computed:{
 			...mapState({
-				list:state => state.cart.list,
-				popupShow:state => state.cart.popupShow
+				list:state => state.cart.list
 			}),
 			...mapGetters([
-				'checkedAll','totalPrice','disableSelectAll','popupData'
+				'checkedAll','totalPrice','disableSelectAll'
 			])
 		},
 		methods:{
 			changeNum(e,item,index){
-				item.num = e
+				//数据和数据库一样则不需要改变
+				if(item.num === e) return;
+				uni.showLoading({
+					title:'加载中...'
+				})
+				//改变商品数量并使数据保存到数据库
+				this.$H.post('/cart/updatenumber/'+item.id,{ num:e },{
+					token:true
+				}).then(res=>{
+					//视图显示
+					item.num = e
+					uni.hideLoading()
+				})
 			},
 			...mapActions([
-				'doSelectAll','doDelGoods','doShowPopup','doHidePopup'
+				'doSelectAll','doDelGoods','doShowPopup'
 			]),
 			...mapMutations([
-				'selectItem'
+				'selectItem','initCartList','unSelectAll'
 			]),
 			//订单结算
 			orderConfirm(){
 				uni.navigateTo({
 					url:'/pages/order-confirm/order-confirm'
+				})
+			},
+			showPopup(index,item){
+				//非编辑状态下禁止操作
+				if(!this.isedit){
+					return;
+				}
+				//根据点击去拿数据库里的数据，减少数据展示
+				this.$H.get('/cart/'+item.id+'/sku',{},{
+					token:true
+				}).then(res=>{
+					//规格选项
+					let check = item.skusText.split(',')
+					res.selects = res.goods_skus_card.map((v,i)=>{
+						let selected = 0
+						let list = v.goods_skus_card_value.map((v1,i1)=>{
+							if(check[i] === v1.value){
+								selected = i1
+							}
+							return {
+								id: v1.id,
+								name: v1.value
+							}
+						})
+						return {
+							id: v.id,
+							title: v.name,
+							selected: selected,
+							list: list
+						}
+					})
+					//商品规格价格
+					res.goods_skus.forEach(item=>{
+						let arr = []
+						for(let key in item.skus){
+							arr.push(item.skus[key].value)
+						}
+						//组织对比 （计算属性）
+						item.skusText = arr.join(',')
+					})
+					if(this.isedit){
+						this.doShowPopup({
+							index,
+							data:res
+						})
+					}
+				})
+			},
+			//获取数据
+			getData(){
+				//获取购物车数据
+				this.$H.get('/cart',{},{
+					token:true,
+					toast:false
+				}).then(res=>{
+					//取消选中状态
+					this.unSelectAll()
+					//赋值
+					this.initCartList(res)
+					uni.stopPullDownRefresh()
+				}).catch(err =>{
+					uni.stopPullDownRefresh()
+				})
+				
+				//获取热门推荐数据
+				this.$H.get('/goods/hotlist').then(res=>{
+					this.hotList = res.map(v=>{
+						return {
+							id: v.id,
+							cover: v.cover,
+							title: v.title,
+							desc: v.desc,
+							oprice: v.min_oprice,
+							pprice: v.min_price
+						}
+					})
 				})
 			}
 		}

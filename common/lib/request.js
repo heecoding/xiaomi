@@ -22,10 +22,10 @@ export default {
 		options.dataType = options.dataType || this.common.dataType
 		
 		// token(全局) checkToken添加token需求与否
-		if (options.checkToken && !options.header.token) {
+		if (options.token) {
 			options.header.token = $store.state.user.token
 			//二次验证（有null情况）
-			if(!options.header.token){
+			if(options.checkToken && !$store.state.user.token){
 				uni.showToast({
 					title:'请先登录',
 					icon:'none'

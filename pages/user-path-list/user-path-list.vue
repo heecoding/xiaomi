@@ -93,7 +93,7 @@
 			})
 		},
 		onUnload() {
-			//关闭监听事件
+			//关闭/卸载 监听事件
 			uni.$off('updateUserPathList')
 		},
 		computed:{
@@ -108,8 +108,7 @@
 			//获取初始数据
 			getData(callback = false){
 				this.$H.get('/useraddresses/'+this.page,{},{
-					token:true,
-					checkToken:true
+					token:true
 				}).then(res=>{
 					// this.page === 1? true : false
 					let refresh = this.page === 1

@@ -1,96 +1,16 @@
+import $H from '@/common/lib/request.js'
+import $U from '@/common/lib/util.js'
+
 export default{
 	state:{//数据源
-		list:[
-			{
-				checked:false,
-				id:11,
-				title:'商品标题11',
-				cover:'/static/images/s7.jpg',
-				//选中商品属性
-				attrs:[
-					{
-						title:'颜色',
-						selected:0,
-						list: [{ name: '火焰红' }, { name: '珊瑚蓝' }, { name: '珍珠白' }]
-					},
-					{
-						title: '容量',
-						selected: 0,
-						list: [{ name: '128GB' }, { name: '256GB' }, { name: '520GB' }]
-					},
-					{
-						title: '套餐',
-						selected: 0,
-						list: [{ name: '标配' }, { name: '套餐一' }, { name: '套餐二' }]
-					}
-				],
-				pprice:1399,
-				num:1,
-				minnum:1,
-				maxnum:10
-			},
-			{
-				checked:false,
-				id:12,
-				title:'商品标题11',
-				cover:'/static/images/s7.jpg',
-				//选中商品属性
-				attrs:[
-					{
-						title:'颜色',
-						selected:0,
-						list: [{ name: '火焰红' }, { name: '珊瑚蓝' }, { name: '珍珠白' }]
-					},
-					{
-						title: '容量',
-						selected: 0,
-						list: [{ name: '128GB' }, { name: '256GB' }, { name: '520GB' }]
-					},
-					{
-						title: '套餐',
-						selected: 0,
-						list: [{ name: '标配' }, { name: '套餐一' }, { name: '套餐二' }]
-					}
-				],
-				pprice:1399,
-				num:1,
-				minnum:1,
-				maxnum:10
-			},
-			{
-				checked:false,
-				id:13,
-				title:'商品标题11',
-				cover:'/static/images/s7.jpg',
-				//选中商品属性
-				attrs:[
-					{
-						title:'颜色',
-						selected:0,
-						list: [{ name: '火焰红' }, { name: '珊瑚蓝' }, { name: '珍珠白' }]
-					},
-					{
-						title: '容量',
-						selected: 0,
-						list: [{ name: '128GB' }, { name: '256GB' }, { name: '520GB' }]
-					},
-					{
-						title: '套餐',
-						selected: 0,
-						list: [{ name: '标配' }, { name: '套餐一' }, { name: '套餐二' }]
-					}
-				],
-				pprice:1399,
-				num:1,
-				minnum:1,
-				maxnum:10
-			}
-		],
+		list:[],
+		//选中列表(存放选中的id)
 		selectedList:[],
 		//popup显示
 		popupShow:'none',
 		//操作商品的索引 开始未选中-1
-		popupIndex:-1
+		popupIndex:-1,
+		popupData:{}
 	},
 	getters:{//计算属性,可处理数据,省去页面数据处理
 		//判断是否全选
@@ -111,11 +31,21 @@ export default{
 		disableSelectAll:(state) =>{
 			return state.list.length === 0
 		},
-		popupData:(state)=>{
-			return state.popupIndex > -1 ? state.list[state.popupIndex] : {}
+		//购物车商品数量
+		cartCount:(state)=>{
+			if(state.list.length <= 99){
+				return state.list.length
+			}
+			return '99+'
 		}
 	},
 	mutations:{//唯一改变数据源方法，同步
+		//初始化list
+		initCartList(state,list){
+			state.list = list
+			//tabbar角标
+			$U.updateCartBadge(state.list.length)
+		},
 		//选中或取消选中单个商品
 		selectItem(state,index){
 			let id = state.list[index].id
@@ -160,6 +90,8 @@ export default{
 		//加入购物车
 		addGoodsToCart(state,goods){
 			state.list.unshift(goods)
+			//tabbar角标
+			$U.updateCartBadge(state.list.length)
 		}
 	},
 	actions:{//异步方法，分发mutation
@@ -167,23 +99,42 @@ export default{
 		doSelectAll({commit,getters}){
 			getters.checkedAll ? commit('unSelectAll'):commit('selectAll')
 		},
-		doDelGoods({commit}){
+		doDelGoods({commit,state}){
+			//未选中商品
+			if(state.selectedList.length === 0){
+				return uni.showToast({
+					title:'请选择要删除的商品',
+					icon:'none'
+				})
+			}
 			uni.showModal({
 				content: '确定删除选中？',
 				success: (res) =>{
 					if (res.confirm) {
-						commit('delGoods')
-						uni.showToast({
-							title: '删除成功'
-						});
+						$H.post('/cart/delete',{
+							shop_ids:state.selectedList.join(',')
+						},{
+							token:true
+						}).then(res=>{
+							commit('delGoods')
+							//删除后取消选中状态
+							commit('unSelectAll')
+							uni.showToast({
+								title: '删除成功'
+							})
+						})
 					}
 				}
-			});
+			})
+			//tabbar角标
+			$U.updateCartBadge(state.list.length)
 		},
 		//popup的显示
-		doShowPopup({state,commit},index){
+		doShowPopup({state,commit},{index,data}){
 			//获取初始商品索引popupIndex
 			commit('initPopupIndex',index)
+			state.popupData = data
+			state.popupData.item = state.list[index]
 			state.popupShow = 'show'
 		},
 		//popup的隐藏

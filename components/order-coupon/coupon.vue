@@ -1,13 +1,15 @@
 <template>
-	<view class="bg-white rounded border border-light-secondary d-flex a-center mb-3">
+	<view class="bg-white rounded border border-light-secondary d-flex a-center mb-3" @click="$emit('click')">
 		<view class="flex-1 d-flex flex-column j-center px-3">
 			<view class="font-md" :class="item.disabled || !item.status ? 'text-light-muted':''">{{item.title}}</view>
-			<view class="font text-light-muted">{{item.start_time}}~{{item.end_time}}</view>
+			<view class="font text-light-muted">{{item.start_time | formatTime}}~{{item.end_time | formatTime}}</view>
 		</view>
 		<view class="text-white d-flex flex-column a-center j-center" style="width: 220rpx; height: 200rpx;" :class="item.disabled || !item.status ? 'bg-secondary':'main-bg-color'">
-			<view class="font-lg">{{item.price}}<text class="font">元</text></view>
+			<view class="font-lg">{{item.price}}<text class="font">{{item.type === 0 ? '元':'折'}}</text></view>
 			<view>{{item.desc}}</view>
-			<view class="rounded w-50 text-center" :class="item.disabled ? 'text-light-muted':'text-white'" :hover-class="item.disabled || !item.status ? 'bg-light':'main-bg-hover-color'">{{item.status ? '去使用':'已失效'}}</view>
+			<view class="rounded w-50 text-center" :class="item.disabled ? 'text-light-muted':'text-white'" :hover-class="item.disabled || !item.status ? 'bg-light':'main-bg-hover-color'">
+			<slot>{{item.status ? '去使用':'已失效'}}</slot>
+			</view>
 		</view>
 	</view>
 </template>
@@ -17,6 +19,16 @@
 		props:{
 			item:Object,
 			index:Number
+		},
+		filters:{
+			formatTime(shorttime) {
+				shorttime = shorttime.toString().length<13 ? shorttime*1000 : shorttime;
+				let date = new Date(shorttime)
+				let parseNumber = (num)=>{
+					return num < 10 ? "0" + num : num;
+				}
+				return date.getFullYear() +'-'+ parseNumber(date.getMonth() + 1) +'-'+ parseNumber(date.getDate())+' '+parseNumber(date.getHours())+':'+parseNumber(date.getMinutes())
+			}
 		}
 	}
 </script>

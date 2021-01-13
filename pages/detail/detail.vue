@@ -15,6 +15,12 @@
 						<text>{{checkedSkus}}</text>
 					</view>
 				</uniListItem>
+				<uniListItem>
+					<view class="d-flex" @click="goToCoupon">
+						<text class="text-muted mr-2">领取优惠券</text>
+						<text class="main-text-color">马上领取</text>
+					</view>
+				</uniListItem>
 				<uniListItem @click="show('express')">
 					<view class="d-flex">
 						<text class="text-muted mr-2">配送</text>
@@ -47,7 +53,7 @@
 		<!-- 热门推荐 -->
 		<card headTitle="猜你喜欢" :headTitleWWeight="false" :headBorderBottom="false">
 			<view class="row j-sb">
-				<commonList v-for="(item, index) in loveList" :key="index" :item="item" :index="index"></commonList>
+				<commonList v-for="(item, index) in loveList" :key="index" :item="item" :index="index" type = "redirectTo"></commonList>
 			</view>
 		</card>
 		<!-- 底部操作 -->
@@ -69,7 +75,7 @@
 				</card>
 				<view class="d-flex j-sb a-center p-2 border-top border-light-secondary">
 					<text>购买数量</text>
-					<uniNumberBox :min="1" :max="maxStock" :value="details.num" @change="details.num = $event"></uniNumberBox>
+					<uniNumberBox :min="maxStock? 1 : 0" :max="maxStock" :value="details.num" @change="details.num = $event"></uniNumberBox>
 				</view>
 			</scroll-view>
 			<!-- 按钮 -->
@@ -401,6 +407,12 @@ export default {
 				content: '点击链接为:' + href,
 				showCancel: false
 			});
+		},
+		//进入领取优惠券界面
+		goToCoupon(){
+			this.navigateTo({
+				url:'../coupon/coupon'
+			})
 		}
 	}
 };

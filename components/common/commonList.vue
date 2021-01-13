@@ -24,12 +24,16 @@
 		},
 		props:{
 			item:Object,
-			index:Number
+			index:Number,
+			type:{
+				type:String,
+				default:"navigateTo"
+			}
 		},
 		methods:{
 			openDetail(){
 				//重定向，避免打开太多窗口，返回关闭窗口
-				uni.redirectTo({
+				uni[this.type]({
 					//GET传参方式，把参数带到子页
 					url:'/pages/detail/detail?detail='+JSON.stringify(this.item)
 				})

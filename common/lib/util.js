@@ -7,5 +7,8 @@ export default{
 				text:count.toString()
 			})
 		}
+		uni.removeTabBarBadge({
+			index:2
+		})
 	}
 }

@@ -53,7 +53,7 @@
 			})
 		},
 		methods: {
-			...mapMutations(['loginout']),
+			...mapMutations(['loginout','clearCart']),
 			navigate(path){
 				if(!path) return{};
 				uni.navigateTo({
@@ -73,6 +73,8 @@
 					}).then(res =>{
 					//定义新的事件，触发清除user-vuex数据的同时，做出下一步动作
 					this.loginout()
+					//清空购物车
+					this.clearCart()
 					uni.showToast({
 						title:'退出成功',
 						success: () => {

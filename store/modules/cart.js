@@ -92,10 +92,34 @@ export default{
 			state.list.unshift(goods)
 			//tabbar角标
 			$U.updateCartBadge(state.list.length)
+		},
+		//清空购物车
+		clearCart(state){
+			state.list = []
+			state.selectedList = []
+			$U.updateCartBadge(state.list.length)
 		}
 	},
 	actions:{//异步方法，分发mutation
 	//传参->解构赋值 { }
+		//更新购物车列表
+		updateCartList({state,commit}){
+			return new Promise((resolve,reject)=>{
+				$H.get('/cart',{},{
+					token:true,
+					toast:false
+				}).then(res=>{
+					//取消选中状态
+					commit('unSelectAll')
+					//赋值
+					commit('initCartList',res)
+					resolve(res)
+				}).catch(err =>{
+					reject(err)
+				})
+			})
+		},
+		//全选
 		doSelectAll({commit,getters}){
 			getters.checkedAll ? commit('unSelectAll'):commit('selectAll')
 		},

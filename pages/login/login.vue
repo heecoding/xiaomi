@@ -101,6 +101,8 @@
 				}).then(res=>{
 					//登陆状态存储
 					this.login(res)
+					//刷新购物车
+					uni.$emit('updateCart')
 					
 					//隐藏并返回
 					uni.hideLoading()

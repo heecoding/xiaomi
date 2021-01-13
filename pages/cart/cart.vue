@@ -111,10 +111,6 @@
 		},
 		onLoad(){
 			this.getData()
-			//创建添加购物车的全局监听
-			uni.$on('updateCart',()=>{
-				this.getData()
-			})
 		},
 		beforeDestroy() {
 			//卸载添加购物车的全局监听
@@ -125,7 +121,8 @@
 		},
 		computed:{
 			...mapState({
-				list:state => state.cart.list
+				list:state => state.cart.list,
+				selectedList:state =>state.cart.selectedList
 			}),
 			...mapGetters([
 				'checkedAll','totalPrice','disableSelectAll'
@@ -148,15 +145,21 @@
 				})
 			},
 			...mapActions([
-				'doSelectAll','doDelGoods','doShowPopup'
+				'doSelectAll','doDelGoods','doShowPopup','updateCartList'
 			]),
 			...mapMutations([
 				'selectItem','initCartList','unSelectAll'
 			]),
 			//订单结算
 			orderConfirm(){
+				if(this.selectedList.length === 0){
+					return uni.showToast({
+						title:'请选择要结算的商品',
+						icon:'none'
+					})
+				}
 				uni.navigateTo({
-					url:'/pages/order-confirm/order-confirm'
+					url:'/pages/order-confirm/order-confirm?detail='+JSON.stringify(this.selectedList)
 				})
 			},
 			showPopup(index,item){
@@ -198,6 +201,7 @@
 						item.skusText = arr.join(',')
 					})
 					if(this.isedit){
+						console.log(res)
 						this.doShowPopup({
 							index,
 							data:res
@@ -208,18 +212,23 @@
 			//获取数据
 			getData(){
 				//获取购物车数据
-				this.$H.get('/cart',{},{
-					token:true,
-					toast:false
-				}).then(res=>{
-					//取消选中状态
-					this.unSelectAll()
-					//赋值
-					this.initCartList(res)
+				this.updateCartList().then(res =>{
 					uni.stopPullDownRefresh()
 				}).catch(err =>{
 					uni.stopPullDownRefresh()
 				})
+				// this.$H.get('/cart',{},{
+				// 	token:true,
+				// 	toast:false
+				// }).then(res=>{
+				// 	//取消选中状态
+				// 	this.unSelectAll()
+				// 	//赋值
+				// 	this.initCartList(res)
+				// 	uni.stopPullDownRefresh()
+				// }).catch(err =>{
+				// 	uni.stopPullDownRefresh()
+				// })
 				
 				//获取热门推荐数据
 				this.$H.get('/goods/hotlist').then(res=>{

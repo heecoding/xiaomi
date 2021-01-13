@@ -13,12 +13,12 @@
 		</view>
 		<!-- 表单 -->
 		<scroll-view scroll-y class="w-100" style="height: 660rpx;">
-			<card :headTitle="item.title" :headTitleWWeight="false" :headBorderBottom="false" v-for="(item, index) in popupData.selects" :key="index">
-				<ZradioGroup :radioLabel="item" :selected.sync="item.selected"></ZradioGroup>
+			<card :headTitle="itemS.title" :headTitleWWeight="false" :headBorderBottom="false" v-for="(itemS, index) in popupData.selects" :key="index">
+				<ZradioGroup :radioLabel="itemS" :selected.sync="itemS.selected"></ZradioGroup>
 			</card>
 			<view class="d-flex j-sb a-center p-2 border-top border-light-secondary">
 				<text>购买数量</text>
-				<uniNumberBox :min="1" :max="maxStock" :value="popupData.item.num" @change="popupData.item.num = $event"></uniNumberBox>
+				<!-- <uni-number-box :min="1" :max="maxStock" :value="popupData.item.num" @change="popupData.item.num = $event"></uni-number-box> -->
 			</view>
 		</scroll-view>
 		<!-- 按钮 -->
@@ -34,7 +34,7 @@
 </template>
 
 <script>
-	import {mapState,mapGetters,mapMutations,mapActions} from 'vuex'
+	import {mapState,mapActions} from 'vuex'
 	import commonPopup from '@/components/common/common-popup.vue'
 	import uniNumberBox from '@/components/uni-ui/uni-number-box/uni-number-box.vue'
 	import card from '@/components/common/card.vue'

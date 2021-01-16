@@ -89,7 +89,8 @@
 					id:0,
 					type:0,
 					value:0
-				}
+				},
+				order_id:0
 			}
 		},
 		onLoad(e) {
@@ -139,7 +140,7 @@
 			//根据cart传来的id组转化出商品列表
 			goodsList(){
 				return this.items.map(id =>{
-					 return this.list.find(v => v.id === id)
+					return this.list.find(v => v.id === id)
 				})
 			},
 			//最终价格
@@ -150,6 +151,14 @@
 				}
 				//toFixed(2)保留2位小数
 				return (this.coupon.type === 0 ? this.totalPrice - this.coupon.value :( this.totalPrice*this.coupon.value/10).toFixed(2))
+			}
+		},
+		onShow() {
+			//如果已经提交过订单，重定向到订单详情页
+			if(this.order_id > 0){
+				uni.redirectTo({
+					url:'../order-detail/order-detail?id='+this.order_id
+				})
 			}
 		},
 		methods: {
@@ -198,6 +207,8 @@
 							price:res.total_price
 						})
 					})
+					//保存订单id
+					this.order_id = res.id
 					//通知购物车更新数据$emit->App.vue
 					uni.$emit('updateCart')
 				}).catch(err=>{

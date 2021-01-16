@@ -201,7 +201,6 @@
 						item.skusText = arr.join(',')
 					})
 					if(this.isedit){
-						console.log(res)
 						this.doShowPopup({
 							index,
 							data:res

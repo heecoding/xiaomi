@@ -43,10 +43,11 @@ export default {
 			uni.request({
 				...options,
 				success: (result) => {
-					// 服务端失败
+					// 返回原始数据
 					if(options.native){
 						return res(result)
 					}
+					// 服务端失败
 					if(result.statusCode !== 200){
 						if (options.toast !== false) {
 							uni.showToast({

@@ -393,6 +393,15 @@
             }
             
         }
+        ,{
+            "path" : "pages/order-refund/order-refund",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "申请退款",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

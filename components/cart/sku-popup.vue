@@ -18,7 +18,7 @@
 			</card>
 			<view class="d-flex j-sb a-center p-2 border-top border-light-secondary">
 				<text>购买数量</text>
-				<!-- <uni-number-box :min="1" :max="maxStock" :value="popupData.item.num" @change="popupData.item.num = $event"></uni-number-box> -->
+				<uni-number-box v-if="popupData.item" :min="1" :max="maxStock" :value="popupData.item.num" @change="popupData.item.num = $event"></uni-number-box>
 			</view>
 		</scroll-view>
 		<!-- 按钮 -->
@@ -55,34 +55,31 @@
 			}),
 			// 选中的Skus
 			checkedSkus(){
-				//拿到选中的skus组成的字符串（组织后数据）
-				if(this.popupData && this.popupData.selects){
-					let checkedSkus = this.popupData.selects.map(v=>{
-						return v.list[v.selected].name
-					})
-					return checkedSkus.join(',')
+				if(!Array.isArray(this.popupData.selects) && !this.popupData.selects){
+					return ''
 				}
+				//拿到选中的skus组成的字符串（组织后数据）
+				let checkedSkus = this.popupData.selects.map(v=>{
+					return v.list[v.selected].name
+				})
+				return checkedSkus.join(',')
 			},
 			// 选中的skus的索引
 			checkedSkusIndex(){
-				if(this.popupData){
-					if(!Array.isArray(this.popupData.goods_skus)){
-						return -1
-					}
-					let index = this.popupData.goods_skus.findIndex((item) => {
-						return item.skusText === this.checkedSkus
-					})
-					return index
+				if(!Array.isArray(this.popupData.goods_skus) && !this.popupData.goods_skus){
+					return -1
 				}
+				let index = this.popupData.goods_skus.findIndex((item) => {
+					return item.skusText === this.checkedSkus
+				})
+				return index
 			},
 			//显示价格
 			showPrice(){
-				if(this.popupData){
-					if(this.checkedSkusIndex < 0){
-						return this.popupData.item.pprice || 0.00
-					}
-					return this.popupData.goods_skus[this.checkedSkusIndex].pprice
+				if(this.checkedSkusIndex < 0){
+					return this.popupData.item ? this.popupData.item.pprice : 0.00
 				}
+				return this.popupData.goods_skus[this.checkedSkusIndex].pprice
 			},
 			//最大库存
 			maxStock(){

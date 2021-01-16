@@ -1,7 +1,18 @@
 <template>
 	<view>
+		<!-- #ifdef MP -->
+		<!-- 自定义导航栏 -->
+		<view class="bg-white d-flex a-center position-fixed" style="height: 90rpx; top: 0; left: 0; right: 0; z-index: 100;">
+			<!-- 中间 -->
+			<input type="text" v-model="keyword" class="flex-1 bg-light rounded ml-3 px-2" style="height: 65rpx;" placeholder="智能积木" />
+			<!-- 右边 -->
+			<view class="d-flex a-center j-center" style="width: 85rpx;" @click="search">搜索</view>
+		</view>
+		<view style="height: 90rpx; background-color: #FFFFFF;"></view>
+		<!-- #endif -->
+		
 		<!-- 搜索列表 -->
-		<view class="d-flex border-top border-bottom a-center font-md position-fixed top-0 left-0 right-0 bg-white" style="height: 100upx; z-index: 100;">
+		<view class="d-flex border-top border-bottom a-center font-md position-fixed left-0 right-0 bg-white" style="height: 100upx; z-index: 100;">
 			<view class="flex-1 d-flex a-center j-center" v-for="(item,index) in screen.list" :key="index" @tap="changeScreen(index)">
 				<text :class="screen.currentIndex === index ? 'main-text-color':'text-muted'">{{item.name}}</text>
 				<view>

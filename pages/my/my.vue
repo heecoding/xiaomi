@@ -4,9 +4,7 @@
 		<!-- 头部 -->
 		<view class="position-relative d-flex a-center" style="height: 320rpx;">
 			<!-- 消息列表 -->
-			<navigator url="../msg-list/msg-list">
-				<view class="iconfont icon-xiazai16 position-absolute text-white" style="font-size: 50rpx; top: 75rpx; right: 20rpx; z-index: 100;"></view>
-			</navigator>
+			<view class="iconfont icon-xiazai16 position-absolute text-white" style="font-size: 50rpx; top: 75rpx; right: 20rpx; z-index: 100;" @click="navigate('msg-list',true)"></view>
 			<image src="/static/images/bg.jpg" style="height: 320rpx; width: 100%;"></image>
 			
 			<view class="d-flex a-center position-absolute left-0 right-0" style="bottom: 50rpx;">
@@ -26,9 +24,9 @@
 				</view>
 			</view>
 			<view class="d-flex a-center" @click="navigate('order',true)">
-				<view class="flex-1 d-flex flex-column a-center j-center py-3" hover-class="bg-light-secondary" v-for="i in 4" :key="i">
-					<view class="iconfont icon-weibiaoti- font-lg line-h"></view>
-					<view>待付款</view>
+				<view class="flex-1 d-flex flex-column a-center j-center py-3" hover-class="bg-light-secondary" v-for="(item,index) in orders" :key="index" @click.stop="openOrder(item)">
+					<view class="iconfont font-lg line-h" :class="item.icon"></view>
+					<view>{{item.name}}</view>
 				</view>
 			</view>
 		</card>
@@ -73,7 +71,27 @@
 		},
 		data(){
 			return{
-				
+				orders:[
+					{
+						name:'待付款',
+						icon:'icon-weibiaoti-',
+						index:1
+					},
+					{
+						name:'待收货',
+						icon:'icon-daishouhuo',
+						index:2
+					},
+					{
+						name:'待评价',
+						icon:'icon-pinglun',
+						index:3
+					},
+					{
+						name:'待退修',
+						icon:'icon-weixiu'
+					}
+				]
 			}
 		},
 		computed:{
@@ -99,6 +117,16 @@
 						url:'../login/login'
 					})
 				}
+			},
+			openOrder(item){
+				if(item.index){
+					this.navigateTo({
+						url:'/pages/order/order?tabIndex='+item.index
+					})
+				}
+				uni.redirectTo({
+					
+				})
 			}
 		}
 	}

@@ -11,7 +11,8 @@
 				<template v-if="tab.list.length > 0">
 					<!-- 有订单内容 -->
 					<block v-for="(item,index) in tab.list" :key="index" >
-						<orderList :item="item" :index="index"></orderList>
+						<!-- 监听，刷新列表页$emit->update -->
+						<orderList :item="item" :index="index" @update="getOrderList"></orderList>
 					</block>
 				</template>
 				<template v-else>
@@ -55,59 +56,15 @@
 						id:0,
 						nothing:'noPay',
 						msg:'您还没有订单',
-						list:[
-							{
-								createTime:'2020-12-01 10:00',
-								status:'已发货',
-								orderItem:[
-									{
-										cover:'/static/images/s6.jpg',
-										title:'小米10',
-										pprice:'3999.00',
-										attrs:'蓝色 标配',
-										num:1
-									}
-								],
-								totalNum:1,
-								totalPrice:3999.00
-							},
-							{
-								createTime:'2020-12-01 11:00',
-								status:'已发货',
-								orderItem:[
-									{
-										cover:'/static/images/s6.jpg',
-										title:'小米10',
-										pprice:'3999.00',
-										attrs:'蓝色 标配',
-										num:2
-									}
-								],
-								totalNum:2,
-								totalPrice:6999.00
-							},
-							{
-								createTime:'2020-12-01 12:00',
-								status:'已发货',
-								orderItem:[
-									{
-										cover:'/static/images/s6.jpg',
-										title:'小米10',
-										pprice:'3999.00',
-										attrs:'蓝色 标配',
-										num:3
-									}
-								],
-								totalNum:3,
-								totalPrice:9999.00
-							}
-						]
+						key:'all',
+						list:[]
 					},
 					{
 						name:'待付款',
 						id:1,
 						nothing:'noPay',
 						msg:'您还没有待付款订单',
+						key:'paying',
 						list:[]
 					},
 					{
@@ -115,6 +72,7 @@
 						id:2,
 						nothing:'noReceiving',
 						msg:'您还没有待收货订单',
+						key:'receiving',
 						list:[]
 					},
 					{
@@ -122,6 +80,7 @@
 						id:3,
 						nothing:'noComment',
 						msg:'您还没有待评价订单',
+						key:'reviewing',
 						list:[]
 					}
 				],
@@ -131,36 +90,101 @@
 						title: 'Redmi K30 4G',
 						desc: '120Hz流速屏，全速热爱',
 						oprice: 2699,
-						nprice: 1399
+						pprice: 1399
 					},
 					{
 						cover: '/static/images/s7.jpg',
 						title: 'Redmi K30 4G',
 						desc: '120Hz流速屏，全速热爱',
 						oprice: 2699,
-						nprice: 1399
+						pprice: 1399
 					},
 					{
 						cover: '/static/images/s8.jpg',
 						title: 'Redmi K30 4G',
 						desc: '120Hz流速屏，全速热爱',
 						oprice: 2699,
-						nprice: 1399
+						pprice: 1399
 					},
 					{
 						cover: '/static/images/s9.jpg',
 						title: 'Redmi K30 4G',
 						desc: '120Hz流速屏，全速热爱',
 						oprice: 2699,
-						nprice: 1399
+						pprice: 1399
 					}
 				]
 			}
+		},
+		computed:{
+			key(){
+				return this.tabBars[this.tabIndex].key
+			}
+		},
+		onLoad(e) {
+			if(e.tabIndex){
+				this.tabIndex = parseInt(e.tabIndex)
+			}
+			this.getHostList()
+		},
+		onShow() {
+			this.getOrderList()
 		},
 		methods: {
 			// 切换选项卡
 			changeTab(index){
 				this.tabIndex = index
+				this.getOrderList()
+			},
+			getHostList(){
+				//获取热门推荐数据
+				this.$H.get('/goods/hotlist').then(res=>{
+					this.hotList = res.map(v=>{
+						return {
+							id: v.id,
+							cover: v.cover,
+							title: v.title,
+							desc: v.desc,
+							oprice: v.min_oprice,
+							pprice: v.min_price
+						}
+					})
+				})
+			},
+			getOrderList(){
+				let index = this.tabIndex
+				this.$H.post('/order/'+this.key,{},{
+					token:true
+				}).then(res =>{
+					this.tabBars[index].list = res.map(item =>{
+						let order_item = item.order_items.map(v =>{
+							let attrs = []
+							if(v.skus_type === 1 && v.goods_skus && v.goods_skus.skus){
+								let skus = v.goods_skus.skus
+								for(let k in skus){
+									attrs.push(skus[k].value)
+								}
+							}
+							return {
+								id:v.goods_id,
+								cover:v.goods_item.cover,
+								title:v.goods_item.title,
+								pprice:v.price,
+								attrs:attrs.join(','),
+								num:v.num
+							}
+						})
+						return {
+							id:item.id,
+							createTime:item.create_time,
+							status:this.$U.formatStatus(item),
+							orderItem:order_item,
+							totalPrice:item.total_price
+						}
+					})
+				}).catch(err =>{
+					console.log('huoqushibai')
+				})
 			}
 		}
 	}

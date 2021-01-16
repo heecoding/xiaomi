@@ -1870,14 +1870,16 @@ var _vuex = _interopRequireDefault(__webpack_require__(/*! vuex */ 12));
 
 
 var _cart = _interopRequireDefault(__webpack_require__(/*! ./modules/cart.js */ 13));
-var _path = _interopRequireDefault(__webpack_require__(/*! ./modules/path.js */ 14));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };} //引入创建的vuex模块
+var _path = _interopRequireDefault(__webpack_require__(/*! ./modules/path.js */ 16));
+var _user = _interopRequireDefault(__webpack_require__(/*! ./modules/user.js */ 17));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };} //引入创建的vuex模块
 
 _vue.default.use(_vuex.default);var _default =
 
 new _vuex.default.Store({
   modules: {
     cart: _cart.default,
-    path: _path.default } });exports.default = _default;
+    path: _path.default,
+    user: _user.default } });exports.default = _default;
 
 /***/ }),
 
@@ -3002,99 +3004,19 @@ var index = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default = {
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _request = _interopRequireDefault(__webpack_require__(/*! @/common/lib/request.js */ 14));
+var _util = _interopRequireDefault(__webpack_require__(/*! @/common/lib/util.js */ 15));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var _default =
+
+{
   state: { //数据源
-    list: [
-    {
-      checked: false,
-      id: 11,
-      title: '商品标题11',
-      cover: '/static/images/s7.jpg',
-      //选中商品属性
-      attrs: [
-      {
-        title: '颜色',
-        selected: 0,
-        list: [{ name: '火焰红' }, { name: '珊瑚蓝' }, { name: '珍珠白' }] },
-
-      {
-        title: '容量',
-        selected: 0,
-        list: [{ name: '128GB' }, { name: '256GB' }, { name: '520GB' }] },
-
-      {
-        title: '套餐',
-        selected: 0,
-        list: [{ name: '标配' }, { name: '套餐一' }, { name: '套餐二' }] }],
-
-
-      pprice: 1399,
-      num: 1,
-      minnum: 1,
-      maxnum: 10 },
-
-    {
-      checked: false,
-      id: 12,
-      title: '商品标题11',
-      cover: '/static/images/s7.jpg',
-      //选中商品属性
-      attrs: [
-      {
-        title: '颜色',
-        selected: 0,
-        list: [{ name: '火焰红' }, { name: '珊瑚蓝' }, { name: '珍珠白' }] },
-
-      {
-        title: '容量',
-        selected: 0,
-        list: [{ name: '128GB' }, { name: '256GB' }, { name: '520GB' }] },
-
-      {
-        title: '套餐',
-        selected: 0,
-        list: [{ name: '标配' }, { name: '套餐一' }, { name: '套餐二' }] }],
-
-
-      pprice: 1399,
-      num: 1,
-      minnum: 1,
-      maxnum: 10 },
-
-    {
-      checked: false,
-      id: 13,
-      title: '商品标题11',
-      cover: '/static/images/s7.jpg',
-      //选中商品属性
-      attrs: [
-      {
-        title: '颜色',
-        selected: 0,
-        list: [{ name: '火焰红' }, { name: '珊瑚蓝' }, { name: '珍珠白' }] },
-
-      {
-        title: '容量',
-        selected: 0,
-        list: [{ name: '128GB' }, { name: '256GB' }, { name: '520GB' }] },
-
-      {
-        title: '套餐',
-        selected: 0,
-        list: [{ name: '标配' }, { name: '套餐一' }, { name: '套餐二' }] }],
-
-
-      pprice: 1399,
-      num: 1,
-      minnum: 1,
-      maxnum: 10 }],
-
-
+    list: [],
+    //选中列表(存放选中的id)
     selectedList: [],
     //popup显示
     popupShow: 'none',
     //操作商品的索引 开始未选中-1
-    popupIndex: -1 },
+    popupIndex: -1,
+    popupData: {} },
 
   getters: { //计算属性,可处理数据,省去页面数据处理
     //判断是否全选
@@ -3115,11 +3037,21 @@ var index = {
     disableSelectAll: function disableSelectAll(state) {
       return state.list.length === 0;
     },
-    popupData: function popupData(state) {
-      return state.popupIndex > -1 ? state.list[state.popupIndex] : {};
+    //购物车商品数量
+    cartCount: function cartCount(state) {
+      if (state.list.length <= 99) {
+        return state.list.length;
+      }
+      return '99+';
     } },
 
   mutations: { //唯一改变数据源方法，同步
+    //初始化list
+    initCartList: function initCartList(state, list) {
+      state.list = list;
+      //tabbar角标
+      _util.default.updateCartBadge(state.list.length);
+    },
     //选中或取消选中单个商品
     selectItem: function selectItem(state, index) {
       var id = state.list[index].id;
@@ -3164,34 +3096,79 @@ var index = {
     //加入购物车
     addGoodsToCart: function addGoodsToCart(state, goods) {
       state.list.unshift(goods);
+      //tabbar角标
+      _util.default.updateCartBadge(state.list.length);
+    },
+    //清空购物车
+    clearCart: function clearCart(state) {
+      state.list = [];
+      state.selectedList = [];
+      _util.default.updateCartBadge(state.list.length);
     } },
 
   actions: { //异步方法，分发mutation
     //传参->解构赋值 { }
-    doSelectAll: function doSelectAll(_ref) {var commit = _ref.commit,getters = _ref.getters;
+    //更新购物车列表
+    updateCartList: function updateCartList(_ref) {var state = _ref.state,commit = _ref.commit;
+      return new Promise(function (resolve, reject) {
+        _request.default.get('/cart', {}, {
+          token: true,
+          toast: false }).
+        then(function (res) {
+          //取消选中状态
+          commit('unSelectAll');
+          //赋值
+          commit('initCartList', res);
+          resolve(res);
+        }).catch(function (err) {
+          reject(err);
+        });
+      });
+    },
+    //全选
+    doSelectAll: function doSelectAll(_ref2) {var commit = _ref2.commit,getters = _ref2.getters;
       getters.checkedAll ? commit('unSelectAll') : commit('selectAll');
     },
-    doDelGoods: function doDelGoods(_ref2) {var commit = _ref2.commit;
+    doDelGoods: function doDelGoods(_ref3) {var commit = _ref3.commit,state = _ref3.state;
+      //未选中商品
+      if (state.selectedList.length === 0) {
+        return uni.showToast({
+          title: '请选择要删除的商品',
+          icon: 'none' });
+
+      }
       uni.showModal({
         content: '确定删除选中？',
         success: function success(res) {
           if (res.confirm) {
-            commit('delGoods');
-            uni.showToast({
-              title: '删除成功' });
+            _request.default.post('/cart/delete', {
+              shop_ids: state.selectedList.join(',') },
+            {
+              token: true }).
+            then(function (res) {
+              commit('delGoods');
+              //删除后取消选中状态
+              commit('unSelectAll');
+              uni.showToast({
+                title: '删除成功' });
 
+            });
           }
         } });
 
+      //tabbar角标
+      _util.default.updateCartBadge(state.list.length);
     },
     //popup的显示
-    doShowPopup: function doShowPopup(_ref3, index) {var state = _ref3.state,commit = _ref3.commit;
+    doShowPopup: function doShowPopup(_ref4, _ref5) {var state = _ref4.state,commit = _ref4.commit;var index = _ref5.index,data = _ref5.data;
       //获取初始商品索引popupIndex
       commit('initPopupIndex', index);
+      state.popupData = data;
+      state.popupData.item = state.list[index];
       state.popupShow = 'show';
     },
     //popup的隐藏
-    doHidePopup: function doHidePopup(_ref4) {var state = _ref4.state,commit = _ref4.commit;
+    doHidePopup: function doHidePopup(_ref6) {var state = _ref6.state,commit = _ref6.commit;
       state.popupShow = 'hide';
       setTimeout(function () {
         state.popupShow = 'none';
@@ -3205,30 +3182,182 @@ var index = {
 
 /***/ 14:
 /*!********************************************!*\
+  !*** E:/aaxm/xiaomi/common/lib/request.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _index = _interopRequireDefault(__webpack_require__(/*! @/store/index.js */ 11));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var _default =
+
+{
+  // 全局配置
+  common: {
+    baseUrl: "http://ceshi3.dishait.cn/api",
+    header: _defineProperty({
+      'Content-Type': 'application/json;charset=UTF-8' }, "Content-Type",
+    'application/x-www-form-urlencoded'),
+
+    data: {},
+    method: 'GET',
+    dataType: 'json' },
+
+  // 请求 返回promise
+  request: function request() {var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    // 组织参数
+    options.url = this.common.baseUrl + options.url;
+    options.header = options.header || this.common.header;
+    options.data = options.data || this.common.data;
+    options.method = options.method || this.common.method;
+    options.dataType = options.dataType || this.common.dataType;
+
+    // token(全局) checkToken添加token需求与否
+    if (options.token) {
+      options.header.token = _index.default.state.user.token;
+      //二次验证（有null情况）
+      if (options.checkToken && !_index.default.state.user.token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none' });
+
+        return uni.navigateTo({
+          url: '/pages/login/login' });
+
+      }
+    }
+
+    // 请求
+    return new Promise(function (res, rej) {
+      // 请求之前... todo
+      // 请求中...
+      uni.request(_objectSpread(_objectSpread({},
+      options), {}, {
+        success: function success(result) {
+          // 返回原始数据
+          if (options.native) {
+            return res(result);
+          }
+          // 服务端失败
+          if (result.statusCode !== 200) {
+            if (options.toast !== false) {
+              uni.showToast({
+                title: result.data.msg || '服务端失败',
+                icon: 'none' });
+
+            }
+            return rej(result.data);
+          }
+          // 成功
+          var data = result.data.data;
+          res(data);
+        },
+        fail: function fail(error) {
+          uni.showToast({
+            title: error.errMsg || '请求失败',
+            icon: 'none' });
+
+          return rej();
+        } }));
+
+    });
+  },
+  // get请求
+  get: function get(url) {var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    options.url = url;
+    options.data = data;
+    options.method = 'GET';
+    return this.request(options);
+  },
+  // post请求
+  post: function post(url) {var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    options.url = url;
+    options.data = data;
+    options.method = 'POST';
+    return this.request(options);
+  },
+  // delete请求
+  del: function del(url) {var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    options.url = url;
+    options.data = data;
+    options.method = 'DELETE';
+    return this.request(options);
+  } };exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
+
+/***/ }),
+
+/***/ 15:
+/*!*****************************************!*\
+  !*** E:/aaxm/xiaomi/common/lib/util.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default = {
+  //更新tabbar角标
+  updateCartBadge: function updateCartBadge(count) {
+    if (count > 0) {
+      uni.setTabBarBadge({
+        index: 2,
+        text: count.toString() });
+
+    }
+    uni.removeTabBarBadge({
+      index: 2 });
+
+  },
+  //判断订单状态
+  formatStatus: function formatStatus(order) {
+    if (!order) {
+      return '';
+    }
+    //未支付
+    if (!order.paid_time) {
+      return '待支付';
+    }
+    //退款情况
+    if (order.refund_status !== 'pending') {
+      switch (order.refund_status) {
+        case 'applied':
+          return '退款中';
+          break;
+        case 'success':
+          return '退款成功';
+          break;
+        case 'failed':
+          return '退款失败';
+          break;}
+
+    }
+    //物流
+    switch (order.ship_status) {
+      case 'pending':
+        return '待发货';
+        break;
+      case 'delivered':
+        return '已发货';
+        break;
+      case 'received':
+        return '已签收';
+        break;}
+
+  } };exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
+
+/***/ }),
+
+/***/ 16:
+/*!********************************************!*\
   !*** E:/aaxm/xiaomi/store/modules/path.js ***!
   \********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default = {
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;function _toConsumableArray(arr) {return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();}function _nonIterableSpread() {throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");}function _unsupportedIterableToArray(o, minLen) {if (!o) return;if (typeof o === "string") return _arrayLikeToArray(o, minLen);var n = Object.prototype.toString.call(o).slice(8, -1);if (n === "Object" && o.constructor) n = o.constructor.name;if (n === "Map" || n === "Set") return Array.from(o);if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);}function _iterableToArray(iter) {if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);}function _arrayWithoutHoles(arr) {if (Array.isArray(arr)) return _arrayLikeToArray(arr);}function _arrayLikeToArray(arr, len) {if (len == null || len > arr.length) len = arr.length;for (var i = 0, arr2 = new Array(len); i < len; i++) {arr2[i] = arr[i];}return arr2;}var _default = {
   state: {
-    list: [
-    {
-      name: '姓名',
-      phone: '188****8888',
-      path: '河南省 郑州市 金水区',
-      detailPath: 'CBD',
-      isDefault: false },
-
-    {
-      name: '姓名',
-      phone: '188****8888',
-      path: '河南省 郑州市 金水区',
-      detailPath: 'CBD',
-      isDefault: false }] },
-
-
+    list: [] },
 
   getters: {
     //获取默认地址状态
@@ -3237,6 +3366,10 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
     } },
 
   mutations: {
+    //覆盖收货地址
+    updatePathList: function updatePathList(state, _ref) {var refresh = _ref.refresh,list = _ref.list;
+      state.list = refresh ? list : [].concat(_toConsumableArray(state.list), [list]);
+    },
     //创建收货地址
     createPath: function createPath(state, item) {
       state.list.unshift(item);
@@ -3246,7 +3379,7 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
       state.list.splice(index, 1);
     },
     //修改收货地址
-    updataPath: function updataPath(state, _ref) {var index = _ref.index,item = _ref.item;
+    updataPath: function updataPath(state, _ref2) {var index = _ref2.index,item = _ref2.item;
       for (var key in item) {
         state.list[index][key] = item[key];
       }
@@ -3262,14 +3395,14 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
   actions: {
     //修改地址 并改变默认
-    updataPathAction: function updataPathAction(_ref2, obj) {var commit = _ref2.commit;
+    updataPathAction: function updataPathAction(_ref3, obj) {var commit = _ref3.commit;
       if (obj.item.isDefault) {
         commit('removeDefault');
       }
       commit('updataPath', obj);
     },
     //修改地址 并改变默认
-    createPathAction: function createPathAction(_ref3, item) {var commit = _ref3.commit;
+    createPathAction: function createPathAction(_ref4, item) {var commit = _ref4.commit;
       if (item.isDefault) {
         commit('removeDefault');
       }
@@ -3278,79 +3411,53 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
 /***/ }),
 
-/***/ 15:
+/***/ 17:
 /*!********************************************!*\
-  !*** E:/aaxm/xiaomi/common/lib/request.js ***!
+  !*** E:/aaxm/xiaomi/store/modules/user.js ***!
   \********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var _default = {
-  //封装  复用/简化代码，添加拦截器，便于操作
-  //全局配置
-  common: {
-    //根路径
-    baseUrl: "http://ceshi3.dishait.cn/api",
-    header: _defineProperty({
-      'Content-Type': 'application/json;charset=UTF-8' }, "Content-Type",
-    'application/x-www-from-urlencoded'),
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default = {
+  state: {
+    //登陆状态
+    loginStatus: false,
+    //token
+    token: null,
+    //用户信息
+    userInfo: {} },
 
-    data: {},
-    method: 'GET',
-    dataType: 'json' },
+  getters: {},
 
-  //（核心）请求 返回 Promise
-  request: function request() {var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    //组织参数
-    options.url = this.common.baseUrl + options.url;
-    options.header = options.header || this.common.header;
-    options.data = options.data || this.common.data;
-    options.method = options.method || this.common.method;
-    options.dataType = options.dataType || this.common.dataType;
-    return new Promise(function (res, rej) {
-      //请求之前...token验证
 
-      //请求中...
-      uni.request(_objectSpread(_objectSpread({},
-      options), {}, {
-        success: function success(result) {
-          //服务端失败
-          if (result.statusCode !== 200) {
-            uni.showToast({
-              title: result.data.msg || '服务端失败',
-              icon: 'none' });
-
-            return rej(result.data);
-          }
-          //成功
-          var data = result.data.data;
-          res(data);
-        },
-        fail: function fail(error) {
-          uni.showToast({
-            title: error.errMsg || '请求失败',
-            icon: 'none' });
-
-          return rej();
-        } }));
-
-    });
-  },
-  //GET请求
-  get: function get(url) {var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    options.url = url;
-    options.data = data;
-    options.nethod = 'GET';
-    return this.request(options);
-  },
-  //POST请求
-  post: function post(url) {var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    options.url = url;
-    options.data = data;
-    options.nethod = 'POST';
-    return this.request(options);
-  } };exports.default = _default;
+  mutations: {
+    //APP.vue初始化登录(应用关闭后再次访问)
+    initUser: function initUser(state) {
+      var resInfo = uni.getStorageSync('userInfo');
+      if (resInfo) {
+        resInfo = JSON.parse(resInfo);
+        state.userInfo = resInfo;
+        state.token = resInfo.token;
+        state.loginStatus = true;
+      }
+    },
+    //登录
+    login: function login(state, userInfo) {
+      state.userInfo = userInfo;
+      state.loginStatus = true;
+      state.token = userInfo.token;
+      //持久化存储(localStorage) (同步)
+      uni.setStorageSync('userInfo', JSON.stringify(userInfo));
+    },
+    //退出登录
+    loginout: function loginout(state) {
+      state.userInfo = {};
+      state.loginStatus = false;
+      state.token = null;
+      //清除持久数据
+      uni.removeStorageSync('userInfo');
+    } } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
@@ -9402,18 +9509,18 @@ internalMixin(Vue);
 
 /***/ }),
 
-/***/ 22:
+/***/ 24:
 /*!**********************************************************!*\
   !*** ./node_modules/@babel/runtime/regenerator/index.js ***!
   \**********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! regenerator-runtime */ 23);
+module.exports = __webpack_require__(/*! regenerator-runtime */ 25);
 
 /***/ }),
 
-/***/ 23:
+/***/ 25:
 /*!************************************************************!*\
   !*** ./node_modules/regenerator-runtime/runtime-module.js ***!
   \************************************************************/
@@ -9444,7 +9551,7 @@ var oldRuntime = hadRuntime && g.regeneratorRuntime;
 // Force reevalutation of runtime.js.
 g.regeneratorRuntime = undefined;
 
-module.exports = __webpack_require__(/*! ./runtime */ 24);
+module.exports = __webpack_require__(/*! ./runtime */ 26);
 
 if (hadRuntime) {
   // Restore the original runtime.
@@ -9461,7 +9568,7 @@ if (hadRuntime) {
 
 /***/ }),
 
-/***/ 24:
+/***/ 26:
 /*!*****************************************************!*\
   !*** ./node_modules/regenerator-runtime/runtime.js ***!
   \*****************************************************/
@@ -10193,7 +10300,38 @@ if (hadRuntime) {
 
 /***/ }),
 
-/***/ 293:
+/***/ 3:
+/*!***********************************!*\
+  !*** (webpack)/buildin/global.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || new Function("return this")();
+} catch (e) {
+	// This works if the window reference is available
+	if (typeof window === "object") g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+
+/***/ 311:
 /*!*********************************************************************!*\
   !*** E:/aaxm/xiaomi/components/uni-ui/uParse/src/libs/html2json.js ***!
   \*********************************************************************/
@@ -10215,8 +10353,8 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
 
 
-var _wxDiscode = _interopRequireDefault(__webpack_require__(/*! ./wxDiscode */ 294));
-var _htmlparser = _interopRequireDefault(__webpack_require__(/*! ./htmlparser */ 295));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };} /**
+var _wxDiscode = _interopRequireDefault(__webpack_require__(/*! ./wxDiscode */ 312));
+var _htmlparser = _interopRequireDefault(__webpack_require__(/*! ./htmlparser */ 313));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };} /**
                                                                                                                                                                  * html2Json 改造来自: https://github.com/Jxck/html2json
                                                                                                                                                                  *
                                                                                                                                                                  *
@@ -10465,7 +10603,7 @@ html2json;exports.default = _default;
 
 /***/ }),
 
-/***/ 294:
+/***/ 312:
 /*!*********************************************************************!*\
   !*** E:/aaxm/xiaomi/components/uni-ui/uParse/src/libs/wxDiscode.js ***!
   \*********************************************************************/
@@ -10670,7 +10808,7 @@ function urlToHttpUrl(url, domain) {
 
 /***/ }),
 
-/***/ 295:
+/***/ 313:
 /*!**********************************************************************!*\
   !*** E:/aaxm/xiaomi/components/uni-ui/uParse/src/libs/htmlparser.js ***!
   \**********************************************************************/
@@ -10837,38 +10975,100 @@ HTMLParser;exports.default = _default;
 
 /***/ }),
 
-/***/ 3:
-/*!***********************************!*\
-  !*** (webpack)/buildin/global.js ***!
-  \***********************************/
+/***/ 346:
+/*!***************************************************************!*\
+  !*** E:/aaxm/xiaomi/components/uni-ui/uni-swipe-action/mp.js ***!
+  \***************************************************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-var g;
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default = {
+  data: function data() {
+    return {
+      position: [],
+      button: [] };
 
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
+  },
+  computed: {
+    pos: function pos() {
+      return JSON.stringify(this.position);
+    },
+    btn: function btn() {
+      return JSON.stringify(this.button);
+    } },
 
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || new Function("return this")();
-} catch (e) {
-	// This works if the window reference is available
-	if (typeof window === "object") g = window;
-}
+  watch: {
+    show: function show(newVal) {
+      if (this.autoClose) return;
+      var valueObj = this.position[0];
+      if (!valueObj) return;
+      valueObj.show = newVal;
+      this.$set(this.position, 0, valueObj);
+    } },
 
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
+  mounted: function mounted() {var _this = this;
+    this.init();
+    setTimeout(function () {
+      _this.getSize();
+      _this.getButtonSize();
+    }, 50);
 
-module.exports = g;
+  },
+  methods: {
+    init: function init() {var _this2 = this;
+      uni.$on('__uni__swipe__event', function (res) {
+        if (res !== _this2 && _this2.autoClose) {
+          var valueObj = _this2.position[0];
+          valueObj.show = false;
+          _this2.$set(_this2.position, 0, valueObj);
+        }
+      });
+    },
+    openSwipe: function openSwipe() {
+      uni.$emit('__uni__swipe__event', this);
+    },
+    change: function change(e) {
+      this.$emit('change', e.open);
+      var valueObj = this.position[0];
+      valueObj.show = e.open;
+      this.$set(this.position, 0, valueObj);
+      // console.log('改变', e);
+    },
+    onClick: function onClick(index, item) {
+      this.$emit('click', {
+        content: item,
+        index: index });
 
+    },
+    getSize: function getSize() {var _this3 = this;
+      var views = uni.createSelectorQuery().in(this);
+      views.
+      selectAll('.selector-query-hock').
+      boundingClientRect(function (data) {
+        if (_this3.autoClose) {
+          data[0].show = false;
+        } else {
+          data[0].show = _this3.show;
+        }
+        _this3.position = data;
+      }).
+      exec();
+    },
+    getButtonSize: function getButtonSize() {var _this4 = this;
+      var views = uni.createSelectorQuery().in(this);
+      views.
+      selectAll('.button-hock').
+      boundingClientRect(function (data) {
+        _this4.button = data;
+      }).
+      exec();
+    } } };exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
 
-/***/ 328:
+/***/ 356:
 /*!*******************************************************************************!*\
   !*** E:/aaxm/xiaomi/components/uni-ui/mpvue-citypicker/city-data/province.js ***!
   \*******************************************************************************/
@@ -11018,7 +11218,7 @@ provinceData;exports.default = _default;
 
 /***/ }),
 
-/***/ 329:
+/***/ 357:
 /*!***************************************************************************!*\
   !*** E:/aaxm/xiaomi/components/uni-ui/mpvue-citypicker/city-data/city.js ***!
   \***************************************************************************/
@@ -12532,7 +12732,7 @@ cityData;exports.default = _default;
 
 /***/ }),
 
-/***/ 330:
+/***/ 358:
 /*!***************************************************************************!*\
   !*** E:/aaxm/xiaomi/components/uni-ui/mpvue-citypicker/city-data/area.js ***!
   \***************************************************************************/
@@ -25096,7 +25296,7 @@ areaData;exports.default = _default;
 
 /***/ }),
 
-/***/ 43:
+/***/ 45:
 /*!**********************************************!*\
   !*** E:/aaxm/xiaomi/common/mixin/loading.js ***!
   \**********************************************/
@@ -25115,6 +25315,125 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
     this.$nextTick(function () {
       _this.beforeReady = false;
     });
+  } };exports.default = _default;
+
+/***/ }),
+
+/***/ 74:
+/*!*****************************************!*\
+  !*** E:/aaxm/xiaomi/common/lib/time.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default = {
+  // 计算当前日期星座
+  getHoroscope: function getHoroscope(date) {
+    var c = ['摩羯', '水瓶', '双鱼', '白羊', '金牛', '双子', '巨蟹', '狮子', '处女', '天秤', '天蝎', '射手', '摩羯'];
+    date = new Date(date);
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var startMonth = month - (day - 14 < '865778999988'.charAt(month));
+    return c[startMonth] + '座';
+  },
+  // 计算指定时间与当前的时间差
+  sumAge: function sumAge(data) {
+    var dateBegin = new Date(data.replace(/-/g, "/"));
+    var dateEnd = new Date(); //获取当前时间
+    var dateDiff = dateEnd.getTime() - dateBegin.getTime(); //时间差的毫秒数
+    var dayDiff = Math.floor(dateDiff / (24 * 3600 * 1000)); //计算出相差天数
+    var leave1 = dateDiff % (24 * 3600 * 1000); //计算天数后剩余的毫秒数
+    var hours = Math.floor(leave1 / (3600 * 1000)); //计算出小时数
+    //计算相差分钟数
+    var leave2 = leave1 % (3600 * 1000); //计算小时数后剩余的毫秒数
+    var minutes = Math.floor(leave2 / (60 * 1000)); //计算相差分钟数
+    //计算相差秒数
+    var leave3 = leave2 % (60 * 1000); //计算分钟数后剩余的毫秒数
+    var seconds = Math.round(leave3 / 1000);
+    return dayDiff + "天 " + hours + "小时 ";
+  },
+  // 获取聊天时间（相差300s内的信息不会显示时间）
+  getChatTime: function getChatTime(v1, v2) {
+    v1 = v1.toString().length < 13 ? v1 * 1000 : v1;
+    v2 = v2.toString().length < 13 ? v2 * 1000 : v2;
+    if ((parseInt(v1) - parseInt(v2)) / 1000 > 300) {
+      return this.gettime(v1);
+    }
+  },
+  // 人性化时间格式
+  gettime: function gettime(shorttime) {
+    shorttime = shorttime.toString().length < 13 ? shorttime * 1000 : shorttime;
+    var now = new Date().getTime();
+    var cha = (now - parseInt(shorttime)) / 1000;
+
+    if (cha < 43200) {
+      // 当天
+      return this.dateFormat(new Date(shorttime), "{A} {t}:{ii}");
+    } else if (cha < 518400) {
+      // 隔天 显示日期+时间
+      return this.dateFormat(new Date(shorttime), "{Mon}月{DD}日 {A} {t}:{ii}");
+    } else {
+      // 隔年 显示完整日期+时间
+      return this.dateFormat(new Date(shorttime), "{Y}-{MM}-{DD} {A} {t}:{ii}");
+    }
+  },
+
+  parseNumber: function parseNumber(num) {
+    return num < 10 ? "0" + num : num;
+  },
+
+  dateFormat: function dateFormat(date, formatStr) {
+    var dateObj = {},
+    rStr = /\{([^}]+)\}/,
+    mons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+
+    dateObj["Y"] = date.getFullYear();
+    dateObj["M"] = date.getMonth() + 1;
+    dateObj["MM"] = this.parseNumber(dateObj["M"]);
+    dateObj["Mon"] = mons[dateObj['M'] - 1];
+    dateObj["D"] = date.getDate();
+    dateObj["DD"] = this.parseNumber(dateObj["D"]);
+    dateObj["h"] = date.getHours();
+    dateObj["hh"] = this.parseNumber(dateObj["h"]);
+    dateObj["t"] = dateObj["h"] > 12 ? dateObj["h"] - 12 : dateObj["h"];
+    dateObj["tt"] = this.parseNumber(dateObj["t"]);
+    dateObj["A"] = dateObj["h"] > 12 ? '下午' : '上午';
+    dateObj["i"] = date.getMinutes();
+    dateObj["ii"] = this.parseNumber(dateObj["i"]);
+    dateObj["s"] = date.getSeconds();
+    dateObj["ss"] = this.parseNumber(dateObj["s"]);
+
+    while (rStr.test(formatStr)) {
+      formatStr = formatStr.replace(rStr, dateObj[RegExp.$1]);
+    }
+    return formatStr;
+  },
+  // 获取年龄
+  getAgeByBirthday: function getAgeByBirthday(data) {
+    var birthday = new Date(data.replace(/-/g, "\/"));
+    var d = new Date();
+    return d.getFullYear() - birthday.getFullYear() - (d.getMonth() < birthday.getMonth() || d.getMonth() == birthday.getMonth() && d.getDate() < birthday.getDate() ? 1 : 0);
+  },
+
+  // 倒计时
+  timeDown: function timeDown(endTime) {
+    //获取时间差
+    var now = new Date().getTime() / 1000;
+    var totalSeconds = parseInt(endTime - now);
+    //天数
+    var days = Math.floor(totalSeconds / (60 * 60 * 24));
+    //取模（余数）
+    var modulo = totalSeconds % (60 * 60 * 24);
+    //小时数
+    var hours = Math.floor(modulo / (60 * 60));
+    modulo = modulo % (60 * 60);
+    //分钟
+    var minutes = Math.floor(modulo / 60);
+    //秒
+    var seconds = modulo % 60;
+    //输出还剩多少时间
+    return "".concat(days, "\u5929 ").concat(hours, "\u5C0F\u65F6 ").concat(minutes, "\u5206 ").concat(seconds, "\u79D2");
   } };exports.default = _default;
 
 /***/ })

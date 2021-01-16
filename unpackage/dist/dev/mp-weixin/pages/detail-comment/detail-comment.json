@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "商品评价",
+  "enablePullDownRefresh": true,
   "usingComponents": {
     "myline": "/components/common/myline"
   }

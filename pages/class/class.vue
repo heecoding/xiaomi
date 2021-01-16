@@ -1,23 +1,44 @@
 <template>
-	<view class="d-flex border-top border-light-secondary animated fadeIn faster" style="height: 100%; box-sizing: border-box;">
-		
-		<loading-plus v-if="beforeReady"></loading-plus>
-		
-		<scroll-view id="leftScroll" scroll-y class="flex-1 border-right border-light-secondary" style="height: 100%;" :scroll-top="leftScrollTop">
-			<view class="border-bottom border-light-secondary py-1 left-scroll-item" hover-class="bg-light-secondary" v-for="(item,index) in cate" :key="index" @tap="classChange(index)">
-				<view class="d-flex py-1 font-md j-center" :class="activeIndex === index? 'class-active':''">
-					{{item.name}}
-				</view>
+	<view style="height: 100vh;" class="d-flex flex-column">
+		<!-- #ifdef MP || H5 -->
+		<!-- 自定义导航 微信小程序 -->
+		<view class="d-flex a-center " style="height: 90rpx;">
+			<!-- 左边 -->
+			<view class="d-flex a-center j-center" style="width: 85rpx;">
+				<text class="iconfont icon-xiazai16"></text>
 			</view>
-		</scroll-view>
-		<scroll-view scroll-y :scroll-with-animation="true" style="flex:3.5; height: 100%;" :scroll-top="rightScrollTop" @scroll="onRightScroll">
-			<view class="row right-scroll-item" v-for="(item,index) in list" :key="index">
-				<view class="span24-8 text-center py-2"  v-for="(listItem,listIndex) in item.list" :key="listIndex" @click="openDetail(listItem)">
-					<image :src="listItem.cover" style="width: 120upx; height: 120upx;" mode="widthFix"></image>
-					<text class="d-block">{{listItem.name}}</text>
-				</view>
+			<!-- 中间 -->
+			<view class="flex-1 bg-light rounded d-flex a-center text-light-muted" style="height: 65rpx;" @click="openSearch">
+				<text class="iconfont icon-sousuo mx-2"></text>
+				智能积木
 			</view>
-		</scroll-view>
+			<!-- 右边 -->
+			<view class="d-flex a-center j-center" style="width: 85rpx;">
+				<text class="iconfont icon-saoyisao"></text>
+			</view>
+		</view>
+		<!-- #endif -->
+		
+		<view class="d-flex border-top border-light-secondary animated fadeIn faster" style="height: 100%; box-sizing: border-box;">
+			
+			<loading-plus v-if="beforeReady"></loading-plus>
+			
+			<scroll-view id="leftScroll" scroll-y class="flex-1 border-right border-light-secondary" style="height: 100%;" :scroll-top="leftScrollTop">
+				<view class="border-bottom border-light-secondary py-1 left-scroll-item" hover-class="bg-light-secondary" v-for="(item,index) in cate" :key="index" @tap="classChange(index)">
+					<view class="d-flex py-1 font-md j-center" :class="activeIndex === index? 'class-active':''">
+						{{item.name}}
+					</view>
+				</view>
+			</scroll-view>
+			<scroll-view scroll-y :scroll-with-animation="true" style="flex:3.5; height: 100%;" :scroll-top="rightScrollTop" @scroll="onRightScroll">
+				<view class="row right-scroll-item" v-for="(item,index) in list" :key="index">
+					<view class="span24-8 text-center py-2"  v-for="(listItem,listIndex) in item.list" :key="listIndex" @click="openDetail(listItem)">
+						<image :src="listItem.cover" style="width: 120upx; height: 120upx;" mode="widthFix"></image>
+						<text class="d-block">{{listItem.name}}</text>
+					</view>
+				</view>
+			</scroll-view>
+		</view>
 	</view>
 </template>
 
@@ -67,6 +88,11 @@
 			}
 		},
 		methods:{
+			openSearch(){
+				uni.navigateTo({
+					url:'../search/search'
+				})
+			},
 			//获取节点信息
 			getElInfo(obj={}){
 				return new Promise((resolve,reject) =>{

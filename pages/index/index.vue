@@ -1,6 +1,6 @@
 <template>
 	<view class="bg-white">
-		<!-- #ifdef MP -->
+		<!-- #ifdef MP || H5 -->
 		<!-- 自定义导航 微信小程序 -->
 		<view class="d-flex a-center " style="height: 90rpx;">
 			<!-- 左边 -->
@@ -8,7 +8,7 @@
 				<text class="iconfont icon-xiazai16"></text>
 			</view>
 			<!-- 中间 -->
-			<view class="flex-1 bg-light rounded d-flex a-center text-light-muted" style="height: 65rpx;">
+			<view class="flex-1 bg-light rounded d-flex a-center text-light-muted" style="height: 65rpx;" @click="openSearch">
 				<text class="iconfont icon-sousuo mx-2"></text>
 				智能积木
 			</view>
@@ -140,6 +140,12 @@ export default {
 		this.WXinit();
 	},
 	methods: {
+		//跳转搜索
+		openSearch(){
+			uni.navigateTo({
+				url:'../search/search'
+			})
+		},
 		// 初始化页面事件
 		WXinit(){
 			//获取顶部选项卡
